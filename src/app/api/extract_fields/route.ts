@@ -67,20 +67,20 @@ export async function GET(request: NextRequest) {
       field,
     );
 
-    if (subtopic.choices.length === 0) break;
+    if (subtopic.choices.length === 0) continue;
     const [
       {
         message: { content: subtopicContent },
       },
     ] = subtopic.choices;
 
-    if (subtopicContent === null || subtopicContent === "NULL") break;
+    if (subtopicContent === null || subtopicContent === "NULL") continue;
     const extractedSubtopics = subtopicContent.split("\n");
-    if (extractedSubtopics.length === 0) break;
+    if (extractedSubtopics.length === 0) continue;
     finalFields.push({ name: field, subtopics: extractedSubtopics });
   }
 
-  // TODO: What if `finalFields` is empty?
+  if (finalFields.length === 0) return CouldNotExtract;
 
   return Response.json({ success: true, fields: finalFields });
 }
