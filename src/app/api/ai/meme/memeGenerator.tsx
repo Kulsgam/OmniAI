@@ -152,6 +152,7 @@ async function addText(buffer: Buffer, text: string) {
           ),
         },
       ])
+      .png()
       .toBuffer();
 
     // Combine the text overlay and the original image
@@ -167,6 +168,7 @@ async function addText(buffer: Buffer, text: string) {
         { input: textOverlay, top: 0, left: 0 }, // Add text overlay at the top
         { input: buffer, top: Math.ceil(textHeight), left: 0 }, // Add the original image below the text
       ])
+      .png()
       .toBuffer();
 
     return finalImage;
