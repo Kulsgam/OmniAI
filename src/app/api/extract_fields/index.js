@@ -4,7 +4,7 @@
 
 import fs from 'fs';
 import fetch from 'node-fetch';
-
+import { getImagePrompt } from 'route.js';
 async function downloadImage(imageUrl) {
   // Fetching the image from the URL
   const response = await fetch(imageUrl);
@@ -18,7 +18,7 @@ async function downloadImage(imageUrl) {
 
 
 // Image details
-const prompt = 'Portrait of Incredible Hulk character in a fashion style wea...';
+const prompt = getImagePrompt();
 const width = 1845;
 const height = 1038;
 const seed = 59765; // Each seed generates a new image variation
