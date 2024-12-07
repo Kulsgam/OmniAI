@@ -1,6 +1,36 @@
-// import Groq from "groq-sdk";
-// import { type NextRequest } from "next/server";
-// import Queries from "../queries.json" with { type: "json" };
+import Groq from "groq-sdk";
+import Queries from "../queries.json" with { type: "json" };
+
+// Assuming Groq is initialized somewhere
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+async function getImagePrompt(inputPrompt: string, context?: string): Promise<string> {
+    if (!context) {
+        return inputPrompt; // Return the input prompt directly if no context is provided
+    }
+
+    try {
+        // Call Groq's chat completion API to generate the image prompt
+        const response = await groq.chat.completions.create({
+            messages: [
+                { role: "system", content: `You are a helpful assistant generating creative image prompts.` },
+                { role: "user", content: `Context: ${context}\nInput Prompt: ${inputPrompt}` }
+            ],
+            model: "llama3-8b-8192", // Adjust to your model version if needed
+        });
+
+        const [
+            {
+                message: { content: generatedPrompt },
+            },
+        ] = response.choices;
+
+        return generatedPrompt || inputPrompt; // Return the generated prompt or the input prompt as fallback
+    } catch (error) {
+        console.error("Error generating image prompt:", error);
+        return inputPrompt; // Return the input prompt as fallback in case of an error
+    }
+}
 
 // interface Field {
 //   name: string;
