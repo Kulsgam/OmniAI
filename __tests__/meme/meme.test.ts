@@ -4,7 +4,7 @@ jest.setTimeout(120000);
 describe("MemeGenerator", () => {
   it("generates without context", async () => {
     const memeBuffer = await genMemeBuffer(
-      "Generate a 50 word story about stepping on a lego brick",
+      "Generate a meme about stepping on a lego brick",
     );
 
     expect(memeBuffer).toBeDefined();
