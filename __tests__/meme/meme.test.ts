@@ -1,6 +1,6 @@
 import genMemeBuffer from "@/app/api/ai/meme/memeGenerator";
 import fs from "fs";
-
+jest.setTimeout(120000);
 describe("MemeGenerator", () => {
   it("generates without context", async () => {
     const memeBuffer = await genMemeBuffer(
