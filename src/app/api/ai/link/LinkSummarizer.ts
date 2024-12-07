@@ -43,9 +43,9 @@ export default class LinkSummarizer {
   }
 
   private async texts(): Promise<string[]> {
-    const summaries = await Promise.all(this.links.map(this.extract));
+    const texts = await Promise.all(this.links.map(this.extract));
 
-    return summaries.filter((summary) => summary !== undefined) as string[];
+    return texts.filter((summary) => summary !== undefined) as string[];
   }
 
   private async extract(link: string): Promise<string | undefined> {
