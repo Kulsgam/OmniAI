@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import Queries from "../queries.json" with { type: "json" };
+import { NextRequest } from "next/server";
 
 // Assuming Groq is initialized somewhere
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -13,7 +14,7 @@ async function getImagePrompt(inputPrompt: string, context?: string): Promise<st
         // Call Groq's chat completion API to generate the image prompt
         const response = await groq.chat.completions.create({
             messages: [
-                { role: "system", content: `You are a helpful assistant generating creative image prompts.` },
+                { role: "system", content: Queries.image_prompt },
                 { role: "user", content: `Context: ${context}\nInput Prompt: ${inputPrompt}` }
             ],
             model: "llama3-8b-8192", // Adjust to your model version if needed
@@ -33,48 +34,48 @@ async function getImagePrompt(inputPrompt: string, context?: string): Promise<st
 }
 
 // interface Field {
-//   name: string;
-//   subtopics: string[];
+//   prompt: string
 // }
 
-// const CouldNotExtract = Response.json({
-//   success: false,
-//   message: "Was unable to extract fields of study.",
-// });
+const CouldNotExtract = Response.json({
+  success: false,
+  message: "Was unable to extract fields of study.",
+});
 
-// export async function getGroqChatCompletion(
-//   groq: Groq,
-//   system: string,
-//   user: string,
-// ) {
-//   return groq.chat.completions.create({
-//     messages: [
-//       { role: "system", content: system },
-//       { role: "user", content: user },
-//     ],
-//     model: "llama3-8b-8192",
-//   });
-// }
+export async function getGroqChatCompletion(
+  groq: Groq,
+  system: string,
+  user: string,
+) {
+  return groq.chat.completions.create({
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+    model: "llama3-8b-8192",
+  });
+}
 
-// export async function GET(request: NextRequest) {
-//   // Extracting the user query
-//   const searchParams = request.nextUrl.searchParams;
-//   const query = searchParams.get("query");
+export async function GET(request: NextRequest) {
+  // Extracting the user query
+  const searchParams = request.nextUrl.searchParams;
+  const query = searchParams.get("input_prompt");
+  const context = searchParams.get("input_context");
+  if (query === null) {
+    return new Response("Invalid input.", { status: 400 });
+  }
 
-//   if (query === null) {
-//     return new Response("Invalid input.", { status: 400 });
-//   }
+  //const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-//   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  /*
+  Get all mentioned fields.
+  Example output from the AI:
+  Math
+  Science
+  */
 
-//   /*
-//   Get all mentioned fields.
-//   Example output from the AI:
-//   Math
-//   Science
-//   */
-//   const fields = await getGroqChatCompletion(groq, Queries.extraction, query);
-//   if (fields.choices.length === 0) return CouldNotExtract;
+  const final_image_prompt = await getImagePrompt(query,context??undefined); //await getGroqChatCompletion(groq, Queries.image_prompt, query);
+  if (final_image_prompt.length === 0) return CouldNotExtract;
 
 //   const [
 //     {
@@ -85,9 +86,9 @@ async function getImagePrompt(inputPrompt: string, context?: string): Promise<st
 //   if (fieldsContent === null || fieldsContent === "NULL")
 //     return CouldNotExtract;
 
-//   const extractedFields = fieldsContent.split("\n", 5);
-//   if (extractedFields.length === 0) return CouldNotExtract;
-
+//   const image_prompt = fieldsContent.split("\n", 5);
+//   if (image_prompt.length === 0) return CouldNotExtract;
+//   const final_prompt: Field = {prompt: "https://pollinations.ai/p/" + image_prompt};
 //   const finalFields: Field[] = [];
 
 //   for (const field of extractedFields) {
@@ -112,5 +113,5 @@ async function getImagePrompt(inputPrompt: string, context?: string): Promise<st
 
 //   if (finalFields.length === 0) return CouldNotExtract;
 
-//   return Response.json({ success: true, fields: finalFields });
-// }
+  return Response.json({ success: true, fields: final_image_prompt });
+}
