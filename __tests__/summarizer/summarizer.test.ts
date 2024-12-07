@@ -37,13 +37,13 @@ describe("LinkSummarizer", () => {
     expect(summary).toBeDefined();
   });
 
-  //   it("summarizes all articles", async () => {
-  //     const linkSummarizer = new LinkSummarizer(links);
+  it("summarizes all articles", async () => {
+    const linkSummarizer = new LinkSummarizer(links);
 
-  //     const summary = await linkSummarizer.summarize();
+    const summary = await linkSummarizer.summarize();
 
-  //     console.log(summary);
+    // console.log(summary);
 
-  //     expect(summary).toBeDefined();
-  //   });
+    expect(summary).toBeDefined();
+  });
 });
