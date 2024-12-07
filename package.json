@@ -16,6 +16,7 @@
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "groq-sdk": "^0.9.0",
     "jsdom": "^25.0.1",
     "lucide-react": "^0.468.0",
     "next": "15.0.4",
@@ -25,7 +26,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^20.17.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^8",

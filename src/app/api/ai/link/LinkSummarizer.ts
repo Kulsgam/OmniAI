@@ -1,14 +1,19 @@
 import axios from "axios";
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
+import Groq from "groq-sdk";
 
-class LinkSummarizer {
+export default class LinkSummarizer {
   links: string[];
+  groq: Groq;
+  summary: string | undefined;
 
   constructor(links: string[]) {
-    this.extract = this.extract.bind(this);
+    this.summarize = this.summarize.bind(this);
 
     this.links = links;
+
+    this.groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
   }
 
   async summarize(): Promise<string | undefined> {
@@ -18,6 +23,23 @@ class LinkSummarizer {
     }
 
     const text = texts.join("\n");
+
+    const summarizedTextCompletion = await this.groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a helpful assistant which helps summarize the text given by the user. Once the user has given the text, you will summarize it",
+        },
+        { role: "user", content: `Here is the text: ${text}` },
+      ],
+      model: "llama3-8b-8192",
+    });
+
+    this.summary =
+      summarizedTextCompletion.choices[0]?.message?.content || undefined;
+
+    return this.summary;
   }
 
   private async texts(): Promise<string[]> {
