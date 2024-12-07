@@ -23,7 +23,10 @@ export type MemeIdea = {
   imageGenPrompt: string;
 };
 
-export default async function genMemeBuffer(userInputPrompt: string, context?: string) {
+export default async function genMemeBuffer(
+  userInputPrompt: string,
+  context?: string,
+) {
   const memeIdea = await genMemeIdea(userInputPrompt, context);
 
   if (!memeIdea) {
@@ -56,6 +59,9 @@ async function genMemeIdea(
       { role: "user", content: finalPrompt },
     ],
     model: "llama3-8b-8192",
+    temperature: 1,
+    top_p: 1,
+    max_tokens: 1024,
   });
 
   const messageOutput = response.choices[0]?.message?.content;
