@@ -23,7 +23,23 @@ export type MemeIdea = {
   imageGenPrompt: string;
 };
 
-export async function genMemeIdea(
+export async function genMemeBuffer(userInputPrompt: string, context?: string) {
+  const memeIdea = await genMemeIdea(userInputPrompt, context);
+
+  if (!memeIdea) {
+    return;
+  }
+
+  const imgBuffer = await genImageBuffer(memeIdea.imageGenPrompt);
+
+  if (!imgBuffer) {
+    return;
+  }
+
+  return addText(imgBuffer, memeIdea.punchline);
+}
+
+async function genMemeIdea(
   userInputPrompt: string,
   context?: string,
 ): Promise<MemeIdea | undefined> {
@@ -63,7 +79,7 @@ export async function genMemeIdea(
   };
 }
 
-export async function addText(buffer: Buffer, text: string) {
+async function addText(buffer: Buffer, text: string) {
   try {
     // Get the metadata of the original image to match dimensions
     const imageMetadata = await sharp(buffer).metadata();
@@ -153,7 +169,7 @@ export async function addText(buffer: Buffer, text: string) {
   }
 }
 
-export async function getImageBuffer(prompt: string) {
+async function genImageBuffer(prompt: string) {
   const imgURL = `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
 
   try {
