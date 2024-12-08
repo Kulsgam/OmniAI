@@ -34,7 +34,7 @@ function ToggleGenerator({
     <Toggle.Root
       pressed={value}
       onPressedChange={setValue}
-      className="flex items-center gap-1 rounded-lg bg-accent px-1.5 py-1 text-sm transition-all duration-200 hover:bg-accent-light data-[state=off]:bg-accent-dark data-[state=off]:text-accent data-[state=off]:hover:bg-accent data-[state=off]:hover:text-accent-light"
+      className="flex items-center gap-1 rounded-lg bg-accent px-1.5 py-1 text-sm transition-all duration-200 data-[state=off]:bg-accent-dark data-[state=off]:text-accent sm:hover:bg-accent-light sm:data-[state=off]:hover:bg-accent sm:data-[state=off]:hover:text-accent-light"
     >
       {children}
     </Toggle.Root>
