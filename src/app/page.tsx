@@ -93,8 +93,11 @@ export default function Home() {
     <div className="relative flex min-h-screen w-full items-center justify-center">
       <div className="absolute left-1/2 top-5 flex w-[293px] -translate-x-1/2 justify-between sm:w-[500px] xl:w-[750px]">
         <Link href="/" className="flex items-center gap-3">
-          <div className="aspect-square w-10 rounded-full bg-accent-dark"></div>
-          <h1 className="font-title text-xl">Some AI</h1>
+          <div
+            className="aspect-square w-10 rounded-full bg-cover bg-center"
+            style={{ backgroundImage: `url("/logo.png")` }}
+          ></div>
+          <h1 className="font-title text-xl">Omni</h1>
         </Link>
         <Link
           href="/"
@@ -105,12 +108,15 @@ export default function Home() {
         </Link>
       </div>
 
-      <div className="flex flex-col items-center rounded-lg sm:bg-black/25 sm:p-10 xl:w-[750px] xl:flex-row xl:gap-14">
+      <div className="flex flex-col items-center rounded-lg sm:bg-accent-darker sm:p-10 xl:w-[750px] xl:flex-row xl:gap-14">
         <div className="flex flex-col items-center justify-center">
-          <div className="mb-8 aspect-square w-48 rounded-full bg-accent-dark"></div>
-          <h1 className="mb-4 font-title text-5xl">Some AI</h1>
+          <div
+            className="mb-8 aspect-square w-48 rounded-full bg-cover bg-center"
+            style={{ backgroundImage: `url("/logo.png")` }}
+          ></div>
+          <h1 className="mb-4 font-title text-5xl">Omni</h1>
           <p className="mb-16 w-[248px] text-center text-accent xl:mb-0">
-            Generate text, images and more with just a simple prompt!
+            Generate text, images, and videos from a single prompt.
           </p>
         </div>
         <Separator.Root

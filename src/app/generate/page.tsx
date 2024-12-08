@@ -82,8 +82,11 @@ function Generate() {
     <div className="relative flex flex-col items-center">
       <div className="mb-16 mt-5 flex w-[293px] justify-between sm:w-[500px] xl:w-[750px]">
         <Link href="/" className="flex items-center gap-3">
-          <div className="aspect-square w-10 rounded-full bg-accent-dark"></div>
-          <h1 className="font-title text-xl">Some AI</h1>
+          <div
+            className="aspect-square w-10 rounded-full bg-cover bg-center"
+            style={{ backgroundImage: `url("/logo.png")` }}
+          ></div>
+          <h1 className="font-title text-xl">Omni</h1>
         </Link>
         <Link
           href="/"
