@@ -12,18 +12,28 @@ import {
   mdiImage,
   mdiVideo,
 } from "@mdi/js";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+
+interface Generators {
+  text: boolean;
+  image: boolean;
+  video: boolean;
+  meme: boolean;
+}
 
 function ToggleGenerator({
+  value,
+  setValue,
   children,
-  defaultChecked = false,
 }: {
+  value: boolean;
+  setValue: (value: boolean) => void;
   children: ReactNode;
-  defaultChecked?: boolean;
 }) {
   return (
     <Toggle.Root
-      defaultPressed={defaultChecked}
+      pressed={value}
+      onPressedChange={setValue}
       className="flex items-center gap-1 rounded-lg bg-accent px-1.5 py-1 text-sm transition-all duration-200 hover:bg-accent-light data-[state=off]:bg-accent-dark data-[state=off]:text-accent data-[state=off]:hover:bg-accent data-[state=off]:hover:text-accent-light"
     >
       {children}
@@ -44,6 +54,36 @@ function StyleOption({ text }: { text: string }) {
 }
 
 export default function Home() {
+  const [disabled, setDisabled] = useState(true);
+  const [prompt, setPrompt] = useState("");
+  const [writingStyle, setWritingStyle] = useState<string | undefined>(
+    undefined,
+  );
+  const [generators, setGenerators] = useState<Generators>({
+    text: true,
+    image: false,
+    video: false,
+    meme: false,
+  });
+
+  useEffect(() => {
+    function isValid(): boolean {
+      if (prompt.length === 0) return false;
+      if (writingStyle === undefined) return false;
+      if (
+        generators.text === false &&
+        generators.image === false &&
+        generators.video === false &&
+        generators.meme === false
+      )
+        return false;
+      return true;
+    }
+
+    setDisabled(!isValid());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prompt, writingStyle, generators]);
+
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center">
       <div className="flex flex-col items-center rounded-lg sm:bg-black/25 sm:p-10 xl:flex-row xl:gap-16 xl:px-16">
@@ -65,9 +105,11 @@ export default function Home() {
             rows={3}
             className="w-full resize-none rounded-lg bg-accent-dark px-4 py-3 placeholder:text-accent"
             placeholder="Enter your prompt"
+            value={prompt}
+            onChange={(evt) => setPrompt(evt.target.value)}
           />
 
-          <Select.Root>
+          <Select.Root value={writingStyle} onValueChange={setWritingStyle}>
             <Select.Trigger className="flex w-full items-center justify-between gap-2 rounded-lg bg-accent-dark px-4 py-2 data-[placeholder]:text-accent">
               <div />
               <Select.Value placeholder="Select a style" />
@@ -104,19 +146,39 @@ export default function Home() {
           </Select.Root>
 
           <div className="flex w-full gap-2">
-            <ToggleGenerator defaultChecked>
+            <ToggleGenerator
+              value={generators.text}
+              setValue={(value) =>
+                setGenerators({ ...generators, text: value })
+              }
+            >
               <Icon path={mdiFormatText} className="aspect-square w-4" />
               Text
             </ToggleGenerator>
-            <ToggleGenerator>
+            <ToggleGenerator
+              value={generators.image}
+              setValue={(value) =>
+                setGenerators({ ...generators, image: value })
+              }
+            >
               <Icon path={mdiImage} className="aspect-square w-4" />
               Image
             </ToggleGenerator>
-            <ToggleGenerator>
+            <ToggleGenerator
+              value={generators.video}
+              setValue={(value) =>
+                setGenerators({ ...generators, video: value })
+              }
+            >
               <Icon path={mdiVideo} className="aspect-square w-4" />
               Video
             </ToggleGenerator>
-            <ToggleGenerator>
+            <ToggleGenerator
+              value={generators.meme}
+              setValue={(value) =>
+                setGenerators({ ...generators, meme: value })
+              }
+            >
               <Icon path={mdiEmoticonExcited} className="aspect-square w-4" />
               Meme
             </ToggleGenerator>
@@ -124,7 +186,8 @@ export default function Home() {
 
           <button
             type="submit"
-            className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2 transition-all duration-200 hover:bg-accent-light"
+            disabled={disabled}
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
           >
             <Icon path={mdiCreation} className="-ml-3 aspect-square w-5" />
             Generate
