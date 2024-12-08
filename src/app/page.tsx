@@ -17,6 +17,8 @@ import {
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useSetAtom } from "jotai";
+import { generateSettingsAtom } from "@/lib/atoms";
 
 interface Generators {
   text: boolean;
@@ -70,6 +72,7 @@ export default function Home() {
     video: false,
     meme: false,
   });
+  const setGenerateSettings = useSetAtom(generateSettingsAtom);
 
   useEffect(() => {
     function isValid(): boolean {
@@ -82,6 +85,12 @@ export default function Home() {
         generators.meme === false
       )
         return false;
+      setGenerateSettings({
+        prompt,
+        style: writingStyle,
+        enableNews: false,
+        generators: { ...generators },
+      });
       return true;
     }
 
