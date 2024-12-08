@@ -3,8 +3,10 @@
 import * as Toggle from "@radix-ui/react-toggle";
 import * as Separator from "@radix-ui/react-separator";
 import * as Select from "@radix-ui/react-select";
+import * as Checkbox from "@radix-ui/react-checkbox";
 import Icon from "@mdi/react";
 import {
+  mdiCheckBold,
   mdiChevronDown,
   mdiCreation,
   mdiEmoticonExcited,
@@ -72,6 +74,7 @@ export default function Home() {
     video: false,
     meme: false,
   });
+  const [enableNews, setEnableNews] = useState(false);
   const setGenerateSettings = useSetAtom(generateSettingsAtom);
 
   useEffect(() => {
@@ -88,7 +91,7 @@ export default function Home() {
       setGenerateSettings({
         prompt,
         style: writingStyle,
-        enableNews: false,
+        enableNews,
         generators: { ...generators },
       });
       return true;
@@ -96,11 +99,11 @@ export default function Home() {
 
     setDisabled(!isValid());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prompt, writingStyle, generators]);
+  }, [prompt, writingStyle, enableNews, generators]);
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center">
-      <div className="absolute left-1/2 top-5 flex w-[293px] -translate-x-1/2 justify-between sm:w-[500px] xl:w-[750px]">
+    <div className="fullscreen relative flex flex-col items-center">
+      <div className="mb-10 mt-5 flex w-[293px] justify-between sm:w-[500px] xl:w-[750px]">
         <Link href="/" className="flex items-center gap-3">
           <div
             className="aspect-square w-10 rounded-full bg-cover bg-center"
@@ -227,6 +230,22 @@ export default function Home() {
             </ToggleGenerator>
           </div>
 
+          <div className="flex w-full items-center justify-start gap-2">
+            <Checkbox.Root
+              checked={enableNews}
+              onCheckedChange={(value) => setEnableNews(value === true)}
+              className="flex aspect-square w-6 items-center justify-center rounded-lg bg-accent-dark"
+              id="enableNews"
+            >
+              <Checkbox.Indicator asChild>
+                <Icon path={mdiCheckBold} className="aspect-square w-4" />
+              </Checkbox.Indicator>
+            </Checkbox.Root>
+            <label htmlFor="enableNews" className="text-accent">
+              Query news sources
+            </label>
+          </div>
+
           <button
             type="submit"
             disabled={disabled}
@@ -237,9 +256,7 @@ export default function Home() {
           </button>
         </form>
       </div>
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-accent">
-        by the Newtrons
-      </div>
+      <div className="mb-5 mt-10 text-accent">by the Newtrons</div>
     </div>
   );
 }

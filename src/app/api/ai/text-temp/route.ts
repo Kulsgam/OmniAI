@@ -85,11 +85,13 @@ export async function GET(request: Request) {
   await new Promise((r) => setTimeout(r, 1000));
   return Response.json({
     text: "ABCD",
-    news: [
-      { title: "abcd", url: "https://google.com" },
-      { title: "xyz", url: "https://reddit.com" },
-      { title: "ghj", url: "https://yahoo.com" },
-    ],
+    news: enableNews
+      ? [
+          { title: "abcd", url: "https://google.com" },
+          { title: "xyz", url: "https://reddit.com" },
+          { title: "ghj", url: "https://yahoo.com" },
+        ]
+      : null,
   });
 
   let newsData: NewsSchema | null = null;

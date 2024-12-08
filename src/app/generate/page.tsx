@@ -238,6 +238,7 @@ function Generate() {
                   {textQuery.data.news.map((news, idx) => (
                     <a
                       className="flex-1 overflow-hidden text-ellipsis text-nowrap rounded-lg bg-accent-dark px-2.5 py-1 transition-colors duration-300 hover:bg-accent"
+                      target="_blank"
                       key={idx}
                       href={news.url}
                     >
@@ -275,9 +276,7 @@ function Generate() {
         </Section>
       </div>
 
-      <div className="bottom-0 left-1/2 mb-5 mt-10 text-accent">
-        by the Newtrons
-      </div>
+      <div className="mb-5 mt-10 text-accent">by the Newtrons</div>
     </div>
   );
 }
