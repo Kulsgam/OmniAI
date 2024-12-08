@@ -1,5 +1,3 @@
-'use server';
-
 import Groq from "groq-sdk";
 import axios from "axios";
 import path from "path";
