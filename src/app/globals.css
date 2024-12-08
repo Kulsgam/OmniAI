@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --theme-background: 17 21 16;
+  --theme-foreground: 217 234 215;
+  --theme-accent: 64 98 58;
+  --theme-accent-light: 102 170 91;
+  --theme-accent-dark: 23 35 21;
+  --theme-accent-darker: 13 16 12;
+  --theme-error: 255 120 120;
+}
+
+body {
+  @apply bg-accent-darker font-body text-base font-medium text-fg sm:bg-bg;
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgb(var(--theme-accent-dark));
+  cursor: default !important;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--theme-accent));
+  cursor: default !important;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--theme-accent-light));
+}

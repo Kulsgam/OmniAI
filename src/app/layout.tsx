@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
+const outfit = localFont({
+  src: "./fonts/Outfit-VariableFont_wght.ttf",
+  variable: "--font-outfit",
   weight: "100 900",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const parkinsans = localFont({
+  src: "./fonts/Parkinsans-VariableFont_wght.ttf",
+  variable: "--font-parkinsans",
+  weight: "300 800",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${outfit.variable} ${parkinsans.variable} antialiased`}>
         {children}
       </body>
     </html>
