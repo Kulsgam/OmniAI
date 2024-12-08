@@ -24,6 +24,31 @@ const CouldNotGenerate = Response.json({
   message: "Was unable to generate text.",
 });
 
+const ADJUSTMENT_QUERY = (adjustment: string) =>
+  `
+You assist the user by modifying a given prompt based on a specified adjustment. For example:
+
+Adjustment: Make it funnier.
+Prompt: Write a post about AI replacing jobs for a Twitter audience.
+Amended prompt: Write a humorous post about AI replacing jobs for a Twitter audience.
+
+Adjustment: Make it more formal.
+Prompt: Explain how plants grow for a school project.
+Amended prompt: Provide a formal explanation of how plants grow for an academic audience.
+
+Adjustment: Add a sense of urgency.
+Prompt: Write an email about the upcoming project deadline.
+Amended prompt: Write an urgent email emphasizing the importance of the upcoming project deadline.
+
+Adjustment: Simplify the language.
+Prompt: Discuss the implications of quantum computing on modern encryption methods.
+Amended prompt: Explain how quantum computing could affect encryption in simple terms.
+
+Your task is to provide only the amended prompt in response, without any additional explanation or formatting.
+
+Adjustment: ${adjustment}
+`.trim();
+
 const NEWS_QUERY = `
 You are a helpful assistant that generates a relevant search query based on the provided text. The search query must only consist of keywords. The search query must be as short as possible. Provide only the search query as your response, with no additional text or formatting.
 `.trim();
@@ -75,36 +100,50 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const inputPrompt = searchParams.get("input_prompt");
-  const style = searchParams.get("style");
+  const style = searchParams.get("style") ?? "appropriate";
   const enableNews = searchParams.get("enable_news") === "true";
+  const adjustments = searchParams.get("adjustments");
 
   if (inputPrompt === null || style === null) {
     return new Response("Invalid input.", { status: 400 });
   }
 
-  await new Promise((r) => setTimeout(r, 1000));
-  return Response.json({
-    text: `
-AI Trends Alert!
+  //   await new Promise((r) => setTimeout(r, 1000));
+  //   return Response.json({
+  //     text: `
+  // AI Trends Alert!
 
-Hey LinkedIn friends! Want to stay ahead of the AI curve? From personalized pricing to cyber-physical futures, the latest trends are changing the game! 
+  // Hey LinkedIn friends! Want to stay ahead of the AI curve? From personalized pricing to cyber-physical futures, the latest trends are changing the game!
 
-Did you know that B2C companies are leveraging AI marketing to boost their sales and customer experience? Or that SEO and social media are merging into a new, powerful beast?
+  // Did you know that B2C companies are leveraging AI marketing to boost their sales and customer experience? Or that SEO and social media are merging into a new, powerful beast?
 
-Stay informed, stay ahead! Share with me: what's the most exciting AI trend you're seeing in your industry right now? Let's connect and explore the future together! #AI #FutureOfWork #InnovationNation`.trim(),
-    news: enableNews
-      ? [
-          { title: "abcd", url: "https://google.com" },
-          { title: "xyz", url: "https://reddit.com" },
-          { title: "ghj", url: "https://yahoo.com" },
-        ]
-      : null,
-  });
+  // Stay informed, stay ahead! Share with me: what's the most exciting AI trend you're seeing in your industry right now? Let's connect and explore the future together! #AI #FutureOfWork #InnovationNation`.trim(),
+  //     news: enableNews
+  //       ? [
+  //           { title: "abcd", url: "https://google.com" },
+  //           { title: "xyz", url: "https://reddit.com" },
+  //           { title: "ghj", url: "https://yahoo.com" },
+  //         ]
+  //       : null,
+  //   });
+
+  let prompt = inputPrompt;
+  if (adjustments !== null) {
+    const adjustedPrompt = await getGroqChatCompletion(
+      ADJUSTMENT_QUERY(adjustments),
+      prompt,
+    );
+    if (adjustedPrompt === null) return CouldNotGenerate;
+    prompt = adjustedPrompt;
+  }
 
   let newsData: NewsSchema | null = null;
 
   if (enableNews) {
-    const newsQuery = await getGroqChatCompletion(NEWS_QUERY, inputPrompt);
+    const newsQuery = await getGroqChatCompletion(
+      NEWS_QUERY,
+      `Prompt: ${prompt}`,
+    );
     if (newsQuery === null) return CouldNotGenerate;
 
     const pageSize = 3;
@@ -136,19 +175,24 @@ Stay informed, stay ahead! Share with me: what's the most exciting AI trend you'
   }
 
   if (newsData === null || newsData?.articles.length === 0) {
-    const text = await getGroqChatCompletion(TEXT_QUERY(style), inputPrompt);
+    const text = await getGroqChatCompletion(TEXT_QUERY(style), prompt);
     if (text === null) return CouldNotGenerate;
-    return Response.json({ text: text, news: null });
+    return Response.json({
+      text: text,
+      prompt: adjustments == null ? null : prompt,
+      news: null,
+    });
   } else {
     const textQuery = TEXT_QUERY_WITH_NEWS(
       style,
       newsData.articles.map((x) => [x.title, x.description, x.content]),
     );
-    const text = await getGroqChatCompletion(textQuery, inputPrompt);
+    const text = await getGroqChatCompletion(textQuery, prompt);
     if (text === null) return CouldNotGenerate;
 
     return Response.json({
       text: text,
+      prompt: adjustments == null ? null : prompt,
       news: newsData.articles.map((x) => ({ title: x.title, url: x.url })),
     });
   }

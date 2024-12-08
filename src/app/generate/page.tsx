@@ -126,6 +126,9 @@ function Generate() {
   const router = useRouter();
   const [state, setState] = useState<State | null>(null);
   const [generateSettings, setGenerateSettings] = useAtom(generateSettingsAtom);
+  const [adjusted, setAdjusted] = useState(false);
+  const [adjustments, setAdjustments] = useState("");
+  const [useAdjustments, setUseAdjustments] = useState(false);
   const queryClient = useQueryClient();
   const textQuery = useQuery({
     queryKey: ["text"],
@@ -138,8 +141,12 @@ function Generate() {
         document.location.toString(),
       );
       endpoint.searchParams.append("input_prompt", state.prompt);
-      endpoint.searchParams.append("style", state.style);
       endpoint.searchParams.append("enable_news", state.enableNews.toString());
+      if (useAdjustments) {
+        endpoint.searchParams.append("adjustments", adjustments);
+      } else if (!adjusted) {
+        endpoint.searchParams.append("style", state.style);
+      }
 
       const res = await axios.get(endpoint.toString());
       if (res.status !== 200) {
@@ -147,14 +154,24 @@ function Generate() {
         throw new Error("Could not get text");
       }
 
-      return z
+      const data = z
         .object({
           text: z.string(),
+          prompt: z.string().nullable(),
           news: z
             .array(z.object({ title: z.string(), url: z.string().url() }))
             .nullable(),
         })
         .parse(res.data);
+
+      if (useAdjustments) {
+        setUseAdjustments(false);
+        setAdjustments("");
+        setState({ ...state, prompt: data.prompt ?? state.prompt });
+        setAdjusted(true);
+      }
+
+      return data;
     },
   });
 
@@ -170,6 +187,12 @@ function Generate() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (useAdjustments) {
+      queryClient.invalidateQueries({ queryKey: ["text"] });
+    }
+  }, [useAdjustments, queryClient]);
 
   if (state === null) {
     return <></>;
@@ -198,13 +221,22 @@ function Generate() {
         </Link>
       </div>
 
-      <form className="mb-16 flex w-[293px] gap-2 sm:w-[500px]">
+      <form
+        className="mb-16 flex w-[293px] gap-2 sm:w-[500px]"
+        onSubmit={(evt) => {
+          evt.preventDefault();
+          setUseAdjustments(true);
+        }}
+      >
         <input
           className="w-full flex-grow rounded-lg bg-accent-dark px-4 py-3 placeholder:text-accent"
           type="text"
           placeholder="Enter your adjustments"
+          value={adjustments}
+          onChange={(evt) => setAdjustments(evt.target.value)}
         />
         <button
+          disabled={adjustments.trim().length === 0 || !state.generators.text}
           className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3.5 py-3 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
           type="submit"
         >
