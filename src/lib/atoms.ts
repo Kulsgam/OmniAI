@@ -17,6 +17,6 @@ export const generateSettingsAtom = atom<Generate | null>({
   prompt:
     "Generate a witty tweet about how AI struggles to understand sarcasm.",
   style: "humorous",
-  enableNews: false,
+  enableNews: true,
   generators: { text: false, image: false, video: false, meme: false },
 });

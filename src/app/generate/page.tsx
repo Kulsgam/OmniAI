@@ -36,7 +36,13 @@ interface State {
 }
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false } },
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  },
 });
 
 function Section({
@@ -169,6 +175,10 @@ function Generate() {
     return <></>;
   }
 
+  if (textQuery.error) {
+    console.log(textQuery.error);
+  }
+
   return (
     <div className="relative flex flex-col items-center">
       <div className="mb-16 mt-5 flex w-[293px] justify-between sm:w-[500px] xl:w-[750px]">
@@ -230,28 +240,25 @@ function Generate() {
         >
           {textQuery.data !== undefined && (
             <>
-              <div className="rounded-lg border-dashed border-accent-dark xl:flex xl:h-full xl:w-full xl:items-center xl:justify-center xl:border-2 xl:p-10 xl:text-center xl:text-xl">
+              <div className="rounded-lg border-dashed border-accent-dark xl:flex xl:h-full xl:w-full xl:items-center xl:justify-center xl:border-2 xl:p-10 xl:text-xl">
                 <p>{textQuery.data.text}</p>
               </div>
               {textQuery.data.news !== null && (
-                <div className="mt-2 flex gap-2">
-                  {textQuery.data.news.map((news, idx) => (
-                    <a
-                      className="flex-1 overflow-hidden text-ellipsis text-nowrap rounded-lg bg-accent-dark px-2.5 py-1 transition-colors duration-300 hover:bg-accent"
-                      target="_blank"
-                      key={idx}
-                      href={news.url}
-                    >
-                      {news.title}
-                      {news.title}
-                      {news.title}
-                      {news.title}
-                      {news.title}
-                      {news.title}
-                      {news.title}
-                    </a>
-                  ))}
-                </div>
+                <>
+                  <h2 className="mt-5 font-title text-xl">Sources</h2>
+                  <div className="mt-2 flex flex-col gap-2">
+                    {textQuery.data.news.map((news, idx) => (
+                      <a
+                        className="flex-1 overflow-hidden text-ellipsis text-nowrap rounded-lg bg-accent-dark px-2.5 py-1 text-sm transition-colors duration-300 hover:bg-accent"
+                        target="_blank"
+                        key={idx}
+                        href={news.url}
+                      >
+                        {news.title}
+                      </a>
+                    ))}
+                  </div>
+                </>
               )}
             </>
           )}

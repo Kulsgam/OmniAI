@@ -84,7 +84,14 @@ export async function GET(request: Request) {
 
   await new Promise((r) => setTimeout(r, 1000));
   return Response.json({
-    text: "ABCD",
+    text: `
+AI Trends Alert!
+
+Hey LinkedIn friends! Want to stay ahead of the AI curve? From personalized pricing to cyber-physical futures, the latest trends are changing the game! 
+
+Did you know that B2C companies are leveraging AI marketing to boost their sales and customer experience? Or that SEO and social media are merging into a new, powerful beast?
+
+Stay informed, stay ahead! Share with me: what's the most exciting AI trend you're seeing in your industry right now? Let's connect and explore the future together! #AI #FutureOfWork #InnovationNation`.trim(),
     news: enableNews
       ? [
           { title: "abcd", url: "https://google.com" },
@@ -142,7 +149,7 @@ export async function GET(request: Request) {
 
     return Response.json({
       text: text,
-      news: newsData.articles.map((x) => [{ title: x.title, url: x.url }]),
+      news: newsData.articles.map((x) => ({ title: x.title, url: x.url })),
     });
   }
 }
