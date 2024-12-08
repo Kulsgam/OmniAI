@@ -9,10 +9,14 @@ import {
   mdiCreation,
   mdiEmoticonExcited,
   mdiFormatText,
+  mdiHistory,
   mdiImage,
+  mdiPaletteSwatchVariant,
   mdiVideo,
 } from "@mdi/js";
 import { ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Generators {
   text: boolean;
@@ -54,6 +58,7 @@ function StyleOption({ text }: { text: string }) {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [disabled, setDisabled] = useState(true);
   const [prompt, setPrompt] = useState("");
   const [writingStyle, setWritingStyle] = useState<string | undefined>(
@@ -86,11 +91,25 @@ export default function Home() {
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center">
-      <div className="flex flex-col items-center rounded-lg sm:bg-black/25 sm:p-10 xl:flex-row xl:gap-16 xl:px-16">
+      <div className="absolute left-1/2 top-5 flex w-[293px] -translate-x-1/2 justify-between sm:w-[500px] xl:w-[750px]">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="aspect-square w-10 rounded-full bg-accent-dark"></div>
+          <h1 className="font-title text-xl">Some AI</h1>
+        </Link>
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-2.5 rounded-lg bg-accent-dark px-3 py-2"
+        >
+          <Icon path={mdiHistory} className="aspect-square w-5" />
+          History
+        </Link>
+      </div>
+
+      <div className="flex flex-col items-center rounded-lg sm:bg-black/25 sm:p-10 xl:w-[750px] xl:flex-row xl:gap-14">
         <div className="flex flex-col items-center justify-center">
           <div className="mb-8 aspect-square w-48 rounded-full bg-accent-dark"></div>
           <h1 className="mb-4 font-title text-5xl">Some AI</h1>
-          <p className="mb-16 w-64 text-center text-accent xl:mb-0">
+          <p className="mb-16 w-[248px] text-center text-accent xl:mb-0">
             Generate text, images and more with just a simple prompt!
           </p>
         </div>
@@ -99,7 +118,13 @@ export default function Home() {
           decorative
           orientation="vertical"
         />
-        <form className="flex w-[293px] flex-col items-center gap-2">
+        <form
+          className="flex w-[293px] flex-col items-center gap-2"
+          onSubmit={(evt) => {
+            evt.preventDefault();
+            router.push("/generate");
+          }}
+        >
           <textarea
             name="prompt"
             rows={3}
@@ -110,8 +135,11 @@ export default function Home() {
           />
 
           <Select.Root value={writingStyle} onValueChange={setWritingStyle}>
-            <Select.Trigger className="flex w-full items-center justify-between gap-2 rounded-lg bg-accent-dark px-4 py-2 data-[placeholder]:text-accent">
-              <div />
+            <Select.Trigger className="flex w-full items-center justify-between gap-2 rounded-lg bg-accent-dark px-2.5 py-2 data-[placeholder]:text-accent">
+              <Icon
+                path={mdiPaletteSwatchVariant}
+                className="aspect-square w-5 text-accent"
+              />
               <Select.Value placeholder="Select a style" />
               <Select.Icon asChild>
                 <Icon
