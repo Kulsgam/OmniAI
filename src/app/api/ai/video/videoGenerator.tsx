@@ -4,6 +4,7 @@ import Groq from "groq-sdk";
 import axios from "axios";
 import path from "path";
 import fs from "fs";
+import { spawn } from "child_process";
 
 const systemPrompt = `You are a helpful assistant that generates video ideas. Given the context and a userInput, you will generate an appropriate description of the video and also a video prompt for the other AI. Additionally, provide a suitable comment to be added under the video. The punchline, video generation prompt, and comment should be separated by 2 newlines. DO NOT GIVE ANY OUTPUT OTHER THAN THE FOLLOWING FORMAT:
 \`\`\`
@@ -180,7 +181,41 @@ async function genVideoBuffer(prompt) {
 async function addTextToVideo(buffer, text) {
   try {
     console.log("Adding text to video...");
-    return buffer;
+
+    const inputFilePath = path.join(process.cwd(), "temp_input.mp4");
+    const outputFilePath = path.join(process.cwd(), "temp_output.mp4");
+
+    fs.writeFileSync(inputFilePath, buffer);
+
+    const ffmpegArgs = [
+      "-i", inputFilePath, 
+      "-vf", `drawtext=text='${text}':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=(h-text_h)/2`, // Text overlay
+      "-codec:a", "copy", 
+      outputFilePath, 
+    ];
+
+    //need to install ffmpeg and set environment variable, otherwise you can just comment this entire code out for now
+    await new Promise((resolve, reject) => {
+      const ffmpeg = spawn("ffmpeg", ffmpegArgs);
+
+      ffmpeg.stdout.on("data", (data) => console.log(data.toString()));
+      ffmpeg.stderr.on("data", (data) => console.error(data.toString()));
+
+      ffmpeg.on("close", (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`FFmpeg exited with code ${code}`));
+        }
+      });
+    });
+
+    const outputBuffer = fs.readFileSync(outputFilePath);
+
+    fs.unlinkSync(inputFilePath);
+    fs.unlinkSync(outputFilePath);
+
+    return outputBuffer;
   } catch (error) {
     console.error("Error adding text to video:", error);
   }
