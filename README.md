@@ -78,7 +78,7 @@ Before starting, ensure you have the following:
 
 ## 🤖 AI APIs Utilized
 
-1. **Groq**: [Llama3-8b](https://groq.com/) - Large language model capabilities.
+1. **Groq**: [Llama3](https://groq.com/) - Large language model capabilities.
 2. **Pollination.ai**: [Image generation API](https://pollinations.ai/) - Visual asset creation.
 3. **Novita.ai**: [Video generation API](https://novita.ai/) - Dynamic video generation.
 4. **NewsAPI.org**: [API for fetching news articles](https://pollinations.ai/) - Real-time news data.
