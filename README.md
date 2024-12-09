@@ -10,7 +10,7 @@
 
 ## STEPS TO RUN
 1. Ensure all dependencies above are installed
-2. Ensure the API keys as outlined in `GETTING API KEYS` are specified in the `.env` file as shown in `example.env`
+2. Ensure the API keys as outlined in [GETTING API KEYS](#getting-api-keys) are specified in the [`.env`](./.env) file as shown in [`example.env`](./example.env)
 3. Go to the root of the repository
 4. Run `npm i` to install all project dependencies
 5. Run `npm run dev`
