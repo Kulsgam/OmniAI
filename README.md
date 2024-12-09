@@ -1,8 +1,26 @@
-<!-- omit in toc -->
-# OmniAI - Turn Headlines Into Highlights 📰🕶️
+<div align="center">
+  <a href="https://genai-hack-global.vercel.app/">
+    <img alt="OmniAI logo" src="./public/logo.png" height="128">
+  </a>
+    <!-- omit in toc -->
+  <h1 style="border: none; margin-bottom: -6%;">OmniAI</h1>
+    <!-- omit in toc -->
+  <h3 style="color: #868686;">Turn Headlines Into Highlights</h3>
+</div>
+
+---
+
 *Are you struggling to keep your audience engaged with fresh, eye-catching content?*
 
 Our app finds the latest news and instantly turns it into stunning posts, videos, and memes—perfect for any platform. Engage effortlessly and stay ahead!
+
+---
+
+<a href="https://example.com" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px;" target="_blank">🚀 Click here to interact with our chatbot 🤖 now!</a>
+
+<!-- omit in toc -->
+## **👇 Click the image to watch the demo video**
+[![Watch the video](./public/embed.png)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 <!-- omit in toc -->
 ### News Articles, Summarized for:  
@@ -12,11 +30,6 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 - **Videos**
 
 ---
-
-<a href="https://example.com" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px;">🚀 Click here to interact with our chatbot 🤖 now!</a>
-
-**👇 Click the image to watch the demo video**
-[![Watch the video](./public/embed.png)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 <!-- omit in toc -->
 ## 📑 Table of Contents
