@@ -99,5 +99,6 @@ Before starting, ensure you have the following:
 ---
 
 ## 📄 Additional Documentation
+- Text generation is often used as context for other media generation. Therefore if the text is regenerated, the user might want to regenerate the other media to 'sync' it.
 
 Stay tuned for more details and usage guides coming soon!
