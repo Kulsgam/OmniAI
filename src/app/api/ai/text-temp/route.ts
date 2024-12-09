@@ -73,7 +73,7 @@ You are a helpful assistant that generates text for the provided prompt using a 
 const NEWS_API_URL = "https://newsapi.org/v2/everything";
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
-export async function getGroqChatCompletion(system: string, user: string) {
+async function getGroqChatCompletion(system: string, user: string) {
   const res = await groq.chat.completions.create({
     messages: [
       { role: "system", content: system },
