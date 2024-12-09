@@ -1,60 +1,102 @@
-'use server';
+"use server";
 
 import Groq from "groq-sdk";
 import axios from "axios";
-import path from "path";
-import fs from "fs";
-import { spawn } from "child_process";
+import assert from "assert";
 
-const systemPrompt = `You are a helpful assistant that generates video ideas. Given the context and a userInput, you will generate an appropriate description of the video and also a video prompt for the other AI. Additionally, provide a suitable comment to be added under the video. The punchline, video generation prompt, and comment should be separated by 2 newlines. DO NOT GIVE ANY OUTPUT OTHER THAN THE FOLLOWING FORMAT:
-\`\`\`
-<punchline>
-
-<video_gen_prompt>
-
-<comment>
-\`\`\``;
-
-export type VideoIdea = {
-  punchline: string;
-  videoGenPrompt: string;
-  comment: string;
+export const portraitDims = {
+  height: 768,
+  width: 432,
 };
 
-export default async function genVideo(userInputPrompt, context) {
-  console.log("initiating");
-  const videoIdea = await genVideoIdea(userInputPrompt, context);
+export const landscapeDims = {
+  height: 432,
+  width: 768,
+};
 
-  if (!videoIdea) {
-    return;
-  }
+export function calculateMaxChars(
+  screenWidth: number,
+  fontSize: number,
+  maxWidthPercentage: number = 0.9,
+): number {
+  const usableWidth = screenWidth * maxWidthPercentage;
+  const charWidthToFontSizeRatio = 0.6;
 
-  const videoBuffer = await genVideoBuffer(videoIdea.videoGenPrompt);
-
-  if (!videoBuffer) {
-    return;
-  }
-
-  const finalVideo = await addTextToVideo(videoBuffer, videoIdea.punchline);
-
-  if(finalVideo){
-    const filePath = path.join(process.cwd(), "videos", "output_video.mp4");
-
-    fs.writeFileSync(filePath, finalVideo);
-  }
-
-  return {
-    punchline: videoIdea.punchline,
-    comment: videoIdea.comment,
-    videoBuffer: finalVideo,
-  };
+  return Math.floor(usableWidth / (fontSize * charWidthToFontSizeRatio));
 }
 
-async function genVideoIdea(userInputPrompt, context) {
-  const finalPrompt = `userInput: ${userInputPrompt}\n${context ? `context: ${context}` : ""}`;
+export function splitTextIntoChunks(text: string, maxChars: number): string[] {
+  const words = text.split(" ");
 
-  console.log("calling groq");
-  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY, dangerouslyAllowBrowser: true});
+  assert(maxChars > Math.max(...words.map((word) => word.length)));
+
+  const chunks: string[] = [];
+  let currentChunk = "";
+
+  for (const word of words) {
+    if (word.length > maxChars) {
+      throw new Error(
+        `A single word (${word}) exceeds the maximum character limit.`,
+      );
+    }
+
+    if (currentChunk.length + word.length + 1 <= maxChars) {
+      currentChunk += (currentChunk.length > 0 ? " " : "") + word;
+    } else {
+      chunks.push(currentChunk);
+      currentChunk = word;
+    }
+  }
+
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks;
+}
+
+export async function genVideoPrompts(videoScript: string, totTime: number) {
+  const systemPrompt = `You are a world class video prompt generating machine. Given an input video script by the user, you will generate ${Math.ceil(totTime / 6)} video prompts in sequential manner, relevant to the video script. Each of those video prompts are separated by 2 newlines. The generated text should include ONLY the video prompts and NO other filler text.
+  eg:-
+  \`\`\`
+  Gloomy environment
+
+  A dark room
+
+  Door closing
+  \`\`\``;
+
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+  const response = await groq.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content: systemPrompt,
+      },
+      { role: "user", content: videoScript },
+    ],
+    model: "llama3-70b-8192",
+    temperature: 1,
+    top_p: 1,
+    max_tokens: 1024,
+  });
+
+  const messageOutput = response.choices[0]?.message?.content;
+
+  if (!messageOutput) {
+    return;
+  }
+
+  return messageOutput.split("\n\n");
+}
+
+export async function genVideoScript(userInput: string, context?: string) {
+  const systemPrompt = `You are a world class video script generating machine, and the video scripts you generate are approximately 30 seconds. The output you generate is entirely the video text only and NO other filler text. You use the input given by the user as context to generate the video script. The video script should only be the text spoken by the user and NOT any other text. The output shouldn't include the roles, and it should only be the narrative text spoken by the user.`;
+
+  const finalPrompt = `userInput: ${userInput}\n${context ? `context: ${context}` : ""}`;
+
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
   const response = await groq.chat.completions.create({
     messages: [
@@ -71,29 +113,11 @@ async function genVideoIdea(userInputPrompt, context) {
   });
 
   const messageOutput = response.choices[0]?.message?.content;
-  console.log(messageOutput);
 
-  if (!messageOutput) {
-    return;
-  }
-
-  const parts = messageOutput.split("\n\n");
-
-  if (parts.length > 99) {
-    console.error(
-      "Video AI didn't format output properly. Output is: " + messageOutput
-    );
-    return;
-  }
-
-  return {
-    punchline: parts[0],
-    videoGenPrompt: parts[1],
-    comment: parts[2],
-  };
+  return messageOutput ?? undefined;
 }
 
-async function genVideoBuffer(prompt) {
+export async function genVideoBuffer(prompt: string) {
   try {
     const payload = {
       extra: {
@@ -131,7 +155,7 @@ async function genVideoBuffer(prompt) {
         headers: {
           Authorization: "Bearer " + process.env.NOVITA_API,
         },
-      }
+      },
     );
 
     const taskId = postResponse.data.task_id;
@@ -146,7 +170,7 @@ async function genVideoBuffer(prompt) {
           headers: {
             Authorization: "Bearer " + process.env.NOVITA_API,
           },
-        }
+        },
       );
 
       status = statusResponse.data.task.status;
@@ -157,7 +181,10 @@ async function genVideoBuffer(prompt) {
         break;
       }
 
-      if (status !== "TASK_STATUS_PROCESSING" && status !== "TASK_STATUS_QUEUED") {
+      if (
+        status !== "TASK_STATUS_PROCESSING" &&
+        status !== "TASK_STATUS_QUEUED"
+      ) {
         console.error("Task failed with status: " + status);
         return;
       }
@@ -175,48 +202,5 @@ async function genVideoBuffer(prompt) {
     }
   } catch (error) {
     console.error("Error generating video buffer:", error);
-  }
-}
-
-async function addTextToVideo(buffer, text) {
-  try {
-    console.log("Adding text to video...");
-
-    const inputFilePath = path.join(process.cwd(), "temp_input.mp4");
-    const outputFilePath = path.join(process.cwd(), "temp_output.mp4");
-
-    fs.writeFileSync(inputFilePath, buffer);
-
-    const ffmpegArgs = [
-      "-i", inputFilePath, 
-      "-vf", `drawtext=text='${text}':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=(h-text_h)/2`, // Text overlay
-      "-codec:a", "copy", 
-      outputFilePath, 
-    ];
-
-    //need to install ffmpeg and set environment variable, otherwise you can just comment this entire code out for now
-    await new Promise((resolve, reject) => {
-      const ffmpeg = spawn("ffmpeg", ffmpegArgs);
-
-      ffmpeg.stdout.on("data", (data) => console.log(data.toString()));
-      ffmpeg.stderr.on("data", (data) => console.error(data.toString()));
-
-      ffmpeg.on("close", (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`FFmpeg exited with code ${code}`));
-        }
-      });
-    });
-
-    const outputBuffer = fs.readFileSync(outputFilePath);
-
-    fs.unlinkSync(inputFilePath);
-    fs.unlinkSync(outputFilePath);
-
-    return outputBuffer;
-  } catch (error) {
-    console.error("Error adding text to video:", error);
   }
 }
