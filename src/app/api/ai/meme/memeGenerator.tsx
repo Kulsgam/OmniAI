@@ -163,7 +163,7 @@ export async function genImageBuffer(
   aspectRatio: "portrait" | "landscape" | "square",
 ) {
   const imgURL = new URL(
-    `https://pollinations.ai/${encodeURIComponent(prompt)}`,
+    `https://pollinations.ai/p/${encodeURIComponent(prompt)}`,
   );
   const size =
     aspectRatio === "portrait"
