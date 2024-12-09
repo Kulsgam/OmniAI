@@ -4,8 +4,12 @@ import {
   mdiContentCopy,
   mdiCreation,
   mdiDownload,
+  mdiEmoticonExcited,
+  mdiFormatText,
+  mdiImage,
   mdiPencil,
   mdiRefresh,
+  mdiVideo,
 } from "@mdi/js";
 import Icon from "@mdi/react";
 import { ReactNode, useEffect, useState } from "react";
@@ -22,6 +26,7 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import { z } from "zod";
+import * as Tabs from "@radix-ui/react-tabs";
 
 interface State {
   prompt: string;
@@ -38,7 +43,6 @@ interface State {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
     },
@@ -65,7 +69,7 @@ function Section({
   const generating = state === "generating" || state === "error";
 
   return (
-    <div className="flex flex-col rounded-lg bg-accent-darker sm:p-5">
+    <div className="flex flex-col rounded-lg border-2 border-solid border-accent-dark bg-accent-darker p-5 sm:border-none">
       <div className="flex w-full items-end justify-between">
         <h1 className="font-title text-3xl">{title}</h1>
         <div className="flex gap-2">
@@ -119,6 +123,17 @@ function Section({
         )}
       </div>
     </div>
+  );
+}
+
+function TabTrigger({ name, children }: { name: string; children: ReactNode }) {
+  return (
+    <Tabs.Trigger
+      className="flex flex-1 items-center justify-center gap-1 bg-accent-dark py-2 text-sm transition-colors duration-300 first:rounded-l-lg last:rounded-r-lg hover:bg-accent data-[state=active]:bg-accent"
+      value={name.toLowerCase()}
+    >
+      {children}
+    </Tabs.Trigger>
   );
 }
 
@@ -244,76 +259,105 @@ function Generate() {
         </button>
       </form>
 
-      <div className="flex w-[293px] flex-col gap-10 rounded-lg sm:w-[500px] sm:gap-5 xl:w-[750px]">
-        <Section
-          title="Text"
-          state={
-            !state.generators.text
-              ? "not_generating"
-              : textQuery.isPending || textQuery.isFetching
-                ? "generating"
-                : textQuery.isError
-                  ? "error"
-                  : "generated"
-          }
-          retrieve_icon="copy"
-          onGenerate={() => {
-            setState({
-              ...state,
-              generators: { ...state.generators, text: true },
-            });
-          }}
-          onRefresh={() =>
-            queryClient.invalidateQueries({ queryKey: ["text"] })
-          }
-          onRetrieve={() =>
-            navigator.clipboard.writeText(textQuery.data?.text ?? "")
-          }
-        >
-          {textQuery.data !== undefined && (
-            <>
-              <div className="rounded-lg border-dashed border-accent-dark xl:flex xl:h-full xl:w-full xl:items-center xl:justify-center xl:border-2 xl:p-10 xl:text-xl">
-                <p>{textQuery.data.text}</p>
-              </div>
-              {textQuery.data.news !== null && (
-                <>
-                  <h2 className="mt-5 font-title text-xl">Sources</h2>
-                  <div className="mt-2 flex flex-col gap-2">
-                    {textQuery.data.news.map((news, idx) => (
-                      <a
-                        className="flex-1 overflow-hidden text-ellipsis text-nowrap rounded-lg bg-accent-dark px-2.5 py-1 text-sm transition-colors duration-300 hover:bg-accent"
-                        target="_blank"
-                        key={idx}
-                        href={news.url}
-                      >
-                        {news.title}
-                      </a>
-                    ))}
-                  </div>
-                </>
-              )}
-            </>
-          )}
-        </Section>
-        <Section
-          title="Image"
-          state={state.generators.image ? "generating" : "not_generating"}
-        >
-          <div className="aspect-square w-full rounded-lg bg-accent-dark"></div>
-        </Section>
-        <Section
-          title="Video"
-          state={state.generators.video ? "generating" : "not_generating"}
-        >
-          <div className="aspect-video w-full rounded-lg bg-accent-dark"></div>
-        </Section>
-        <Section
-          title="Meme"
-          state={state.generators.meme ? "generating" : "not_generating"}
-        >
-          <div className="aspect-square w-full rounded-lg bg-accent-dark"></div>
-        </Section>
-      </div>
+      <Tabs.Root
+        className="flex w-[293px] flex-col gap-2 sm:w-[500px] xl:w-[750px]"
+        defaultValue="text"
+      >
+        <Tabs.List className="flex w-full py-2">
+          <TabTrigger name="Text">
+            <Icon path={mdiFormatText} className="aspect-square w-4" />
+            Text
+          </TabTrigger>
+          <TabTrigger name="Image">
+            <Icon path={mdiImage} className="aspect-square w-4" />
+            Image
+          </TabTrigger>
+          <TabTrigger name="Video">
+            <Icon path={mdiVideo} className="aspect-square w-4" />
+            Video
+          </TabTrigger>
+          <TabTrigger name="Meme">
+            <Icon path={mdiEmoticonExcited} className="aspect-square w-4" />
+            Meme
+          </TabTrigger>
+        </Tabs.List>
+        <Tabs.Content value="text">
+          <Section
+            title="Text"
+            state={
+              !state.generators.text
+                ? "not_generating"
+                : textQuery.isPending || textQuery.isFetching
+                  ? "generating"
+                  : textQuery.isError
+                    ? "error"
+                    : "generated"
+            }
+            retrieve_icon="copy"
+            onGenerate={() => {
+              setState({
+                ...state,
+                generators: { ...state.generators, text: true },
+              });
+            }}
+            onRefresh={() =>
+              queryClient.invalidateQueries({ queryKey: ["text"] })
+            }
+            onRetrieve={() =>
+              navigator.clipboard.writeText(textQuery.data?.text ?? "")
+            }
+          >
+            {textQuery.data !== undefined && (
+              <>
+                <div className="rounded-lg border-dashed border-accent-dark xl:flex xl:h-full xl:w-full xl:items-center xl:justify-center xl:border-2 xl:p-10 xl:text-xl">
+                  <p>{textQuery.data.text}</p>
+                </div>
+                {textQuery.data.news !== null && (
+                  <>
+                    <h2 className="mt-5 font-title text-xl">Sources</h2>
+                    <div className="mt-2 flex flex-col gap-2">
+                      {textQuery.data.news.map((news, idx) => (
+                        <a
+                          className="flex-1 overflow-hidden text-ellipsis text-nowrap rounded-lg bg-accent-dark px-2.5 py-1 text-sm transition-colors duration-300 hover:bg-accent"
+                          target="_blank"
+                          key={idx}
+                          href={news.url}
+                        >
+                          {news.title}
+                        </a>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </Section>
+        </Tabs.Content>
+        <Tabs.Content value="image">
+          <Section
+            title="Image"
+            state={state.generators.image ? "generating" : "not_generating"}
+          >
+            <div className="aspect-square w-full rounded-lg bg-accent-dark"></div>
+          </Section>
+        </Tabs.Content>
+        <Tabs.Content value="video">
+          <Section
+            title="Video"
+            state={state.generators.video ? "generating" : "not_generating"}
+          >
+            <div className="aspect-video w-full rounded-lg bg-accent-dark"></div>
+          </Section>
+        </Tabs.Content>
+        <Tabs.Content value="meme">
+          <Section
+            title="Meme"
+            state={state.generators.meme ? "generating" : "not_generating"}
+          >
+            <div className="aspect-square w-full rounded-lg bg-accent-dark"></div>
+          </Section>
+        </Tabs.Content>
+      </Tabs.Root>
 
       <div className="mb-5 mt-10 text-accent">by the Newtrons</div>
     </div>

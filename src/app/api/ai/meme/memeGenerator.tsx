@@ -178,7 +178,7 @@ async function addText(buffer: Buffer, text: string) {
 }
 
 async function genImageBuffer(prompt: string) {
-  const imgURL = `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
+  const imgURL = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?nologo=true`;
 
   try {
     const response = await axios.get(imgURL, {
