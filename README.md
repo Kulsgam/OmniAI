@@ -1,8 +1,10 @@
+<!-- omit in toc -->
 # OmniAI - Turn Headlines Into Highlights 📰🕶️
 *Are you struggling to keep your audience engaged with fresh, eye-catching content?*
 
 Our app finds the latest news and instantly turns it into stunning posts, videos, and memes—perfect for any platform. Engage effortlessly and stay ahead!
 
+<!-- omit in toc -->
 ### News Articles, Summarized for:  
 - **Memes**  
 - **Text Posts**  
@@ -15,6 +17,17 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 
 **👇 Click the image to watch the demo video**
 [![Watch the video](./public/embed.png)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+
+<!-- omit in toc -->
+## 📑 Table of Contents
+
+- [🧠 Usage](#-usage)
+- [🛠️ Getting Started](#️-getting-started)
+  - [📋 Prerequisites](#-prerequisites)
+  - [🏁 Installation Steps](#-installation-steps)
+- [🤖 AI APIs Utilized](#-ai-apis-utilized)
+- [📄 Additional Documentation](#-additional-documentation)
+
 
 ## 🧠 Usage
 
