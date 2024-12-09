@@ -23,7 +23,7 @@ export type MemeIdea = {
   imageGenPrompt: string;
 };
 
-export default async function genMemeBuffer(
+export default async function genMemeImg(
   userInputPrompt: string,
   context?: string,
 ) {
@@ -33,13 +33,7 @@ export default async function genMemeBuffer(
     return;
   }
 
-  const imgBuffer = await genImageBuffer(memeIdea.imageGenPrompt);
-
-  if (!imgBuffer) {
-    return;
-  }
-
-  return addText(imgBuffer, memeIdea.punchline);
+  return await genImageBuffer(memeIdea.imageGenPrompt);
 }
 
 async function genMemeIdea(
@@ -58,7 +52,7 @@ async function genMemeIdea(
       },
       { role: "user", content: finalPrompt },
     ],
-    model: "llama3-8b-8192",
+    model: "llama3-70b-8192",
     temperature: 1,
     top_p: 1,
     max_tokens: 1024,
@@ -85,10 +79,10 @@ async function genMemeIdea(
   };
 }
 
-async function addText(buffer: Buffer, text: string) {
+export async function addText(imgBuffer: Buffer, text: string) {
   try {
     // Get the metadata of the original image to match dimensions
-    const imageMetadata = await sharp(buffer).metadata();
+    const imageMetadata = await sharp(imgBuffer).metadata();
 
     if (!imageMetadata.width || !imageMetadata.height) {
       throw new Error("Invalid image dimensions");
@@ -166,7 +160,7 @@ async function addText(buffer: Buffer, text: string) {
     })
       .composite([
         { input: textOverlay, top: 0, left: 0 }, // Add text overlay at the top
-        { input: buffer, top: Math.ceil(textHeight), left: 0 }, // Add the original image below the text
+        { input: imgBuffer, top: Math.ceil(textHeight), left: 0 }, // Add the original image below the text
       ])
       .png()
       .toBuffer();

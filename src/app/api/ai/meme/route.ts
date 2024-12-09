@@ -1,4 +1,4 @@
-import genMemeBuffer from "./memeGenerator";
+import genMemeImg from "./memeGenerator";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const meme = await genMemeBuffer(inputPrompt, context ?? undefined);
+  const meme = await genMemeImg(inputPrompt, context ?? undefined);
 
   if (meme === undefined) {
     return Response.json({ error: "Couldn't generate meme." }, { status: 500 });
