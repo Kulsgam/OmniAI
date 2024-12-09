@@ -43,7 +43,6 @@ with_context.png
 without_context.png
 output_video.mp4
 
-/__tests__/data
 /__tests__/out/combined.mp4
 /__tests__/out/subtitled.mp4
 /__tests__/out/combined.mp3
