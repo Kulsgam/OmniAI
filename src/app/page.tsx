@@ -79,7 +79,7 @@ export default function Home() {
   const [disabled, setDisabled] = useState(true);
   const [prompt, setPrompt] = useState("");
   const [writingStyle, setWritingStyle] = useState<string | undefined>(
-    "minimalist",
+    "conversational",
   );
   const [platform, setPlatform] = useState<string | undefined>("twitter");
   const [generators, setGenerators] = useState<Generators>({
@@ -129,7 +129,7 @@ export default function Home() {
         </Link>
         <Link
           href="/"
-          className="flex items-center justify-center gap-2.5 rounded-lg bg-accent-dark px-3 py-2"
+          className="flex items-center justify-center gap-1 rounded-lg bg-accent-dark px-3 py-2"
         >
           <Icon path={mdiHistory} className="aspect-square w-5" />
           History
@@ -143,15 +143,17 @@ export default function Home() {
             style={{ backgroundImage: `url("/logo.png")` }}
           ></div>
           <h1 className="mb-4 font-title text-5xl">OmniAI</h1>
-          <p className="mb-16 w-[248px] text-center text-accent xl:mb-0">
-            Generate text, images, and videos from a single prompt.
+          <p className="mb-8 w-[248px] text-center text-accent xl:mb-0">
+            Turn Headlines into Highlights.
           </p>
         </div>
+
         <Separator.Root
-          className="hidden h-96 w-px bg-accent-dark xl:block"
+          className="hidden h-96 w-[2px] bg-accent-dark xl:block"
           decorative
           orientation="vertical"
         />
+
         <form
           className="flex w-[293px] flex-col items-center gap-2"
           onSubmit={(evt) => {
@@ -190,16 +192,11 @@ export default function Home() {
               >
                 <Select.ScrollUpButton />
                 <Select.Viewport>
-                  <StyleOption text="Narrative" />
                   <StyleOption text="Conversational" />
-                  <StyleOption text="Technical" />
-                  <StyleOption text="Persuasive" />
                   <StyleOption text="Formal" />
                   <StyleOption text="Humorous" />
-                  <StyleOption text="Inspirational" />
-                  <StyleOption text="Instructional" />
-                  <StyleOption text="Poetic" />
-                  <StyleOption text="Minimalist" />
+                  <StyleOption text="Explanatory" />
+                  <StyleOption text="Concise" />
                 </Select.Viewport>
                 <Select.ScrollDownButton />
                 <Select.Arrow className="fill-accent-dark" />
@@ -226,15 +223,15 @@ export default function Home() {
               >
                 <Select.ScrollUpButton />
                 <Select.Viewport>
-                  <StyleOption text="Facebook">
-                    <Icon
-                      path={mdiFacebook}
-                      className="aspect-square w-5 text-accent transition-colors duration-300 group-hover:text-white"
-                    />
-                  </StyleOption>
                   <StyleOption text="Twitter">
                     <Icon
                       path={mdiTwitter}
+                      className="aspect-square w-5 text-accent transition-colors duration-300 group-hover:text-white"
+                    />
+                  </StyleOption>
+                  <StyleOption text="Facebook">
+                    <Icon
+                      path={mdiFacebook}
                       className="aspect-square w-5 text-accent transition-colors duration-300 group-hover:text-white"
                     />
                   </StyleOption>
@@ -321,7 +318,7 @@ export default function Home() {
           <button
             type="submit"
             disabled={disabled}
-            className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-solid border-accent bg-accent py-2 transition-all duration-200 hover:border-accent-light hover:bg-accent-light disabled:border-accent-dark disabled:bg-black/0 disabled:text-accent"
           >
             <Icon path={mdiCreation} className="-ml-3 aspect-square w-5" />
             Generate

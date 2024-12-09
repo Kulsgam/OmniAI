@@ -16,9 +16,9 @@ body {
   @apply bg-accent-darker font-body text-base font-medium text-fg sm:bg-bg;
 }
 
-@media (min-width: 1280px) and (min-height: 700px),
-  (max-width: 1280px) and (min-width: 640px) and (min-height: 1010px),
-  (max-width: 640px) and (min-height: 925px) {
+@media (min-width: 1280px) and (min-height: 650px),
+  (max-width: 1280px) and (min-width: 640px) and (min-height: 950px),
+  (max-width: 640px) and (min-height: 875px) {
   .fullscreen {
     @apply h-screen justify-between;
   }
