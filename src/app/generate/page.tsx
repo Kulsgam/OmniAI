@@ -198,7 +198,7 @@ function Generate() {
         ...generateSettings,
         generators: { ...generateSettings.generators },
       });
-      // setGenerateSettings(null);
+      setGenerateSettings(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

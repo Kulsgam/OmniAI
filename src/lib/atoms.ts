@@ -13,11 +13,4 @@ interface Generate {
   };
 }
 
-// export const generateSettingsAtom = atom<Generate | null>(null);
-export const generateSettingsAtom = atom<Generate | null>({
-  prompt: "Generate a tweet about how AI struggles to understand sarcasm.",
-  style: "humorous",
-  platform: "LinkedIn",
-  enableNews: true,
-  generators: { text: false, image: false, video: false, meme: false },
-});
+export const generateSettingsAtom = atom<Generate | null>(null);

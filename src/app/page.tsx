@@ -65,7 +65,7 @@ function StyleOption({
   return (
     <Select.Item
       value={text.toLowerCase()}
-      className="flex w-full cursor-pointer items-center justify-center gap-2 py-2 transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg hover:bg-accent data-[highlighted]:outline-none"
+      className="group flex w-full cursor-pointer items-center justify-center gap-2 py-2 transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg hover:bg-accent data-[highlighted]:outline-none"
     >
       {children}
       <Select.ItemText>{text}</Select.ItemText>
@@ -79,9 +79,9 @@ export default function Home() {
   const [disabled, setDisabled] = useState(true);
   const [prompt, setPrompt] = useState("");
   const [writingStyle, setWritingStyle] = useState<string | undefined>(
-    undefined,
+    "minimalist",
   );
-  const [platform, setPlatform] = useState<string | undefined>(undefined);
+  const [platform, setPlatform] = useState<string | undefined>("twitter");
   const [generators, setGenerators] = useState<Generators>({
     text: true,
     image: false,
@@ -229,31 +229,31 @@ export default function Home() {
                   <StyleOption text="Facebook">
                     <Icon
                       path={mdiFacebook}
-                      className="aspect-square w-5 text-accent"
+                      className="aspect-square w-5 text-accent transition-colors duration-300 group-hover:text-white"
                     />
                   </StyleOption>
                   <StyleOption text="Twitter">
                     <Icon
                       path={mdiTwitter}
-                      className="aspect-square w-5 text-accent"
+                      className="aspect-square w-5 text-accent transition-colors duration-300 group-hover:text-white"
                     />
                   </StyleOption>
                   <StyleOption text="LinkedIn">
                     <Icon
                       path={mdiLinkedin}
-                      className="aspect-square w-5 text-accent"
+                      className="aspect-square w-5 text-accent transition-colors duration-300 group-hover:text-white"
                     />
                   </StyleOption>
                   <StyleOption text="Instagram">
                     <Icon
                       path={mdiInstagram}
-                      className="aspect-square w-5 text-accent"
+                      className="aspect-square w-5 text-accent transition-colors duration-300 group-hover:text-white"
                     />
                   </StyleOption>
                   <StyleOption text="Reddit">
                     <Icon
                       path={mdiReddit}
-                      className="aspect-square w-5 text-accent"
+                      className="aspect-square w-5 text-accent transition-colors duration-300 group-hover:text-white"
                     />
                   </StyleOption>
                 </Select.Viewport>

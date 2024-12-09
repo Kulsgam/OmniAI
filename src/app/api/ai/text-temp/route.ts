@@ -149,7 +149,6 @@ export async function GET(request: Request) {
     const pageSize = 3;
     const endpoint = new URL(NEWS_API_URL);
     endpoint.searchParams.append("q", newsQuery);
-    endpoint.searchParams.append("excludeDomains", "removed.com");
     endpoint.searchParams.append("pageSize", pageSize.toString(10));
     endpoint.searchParams.append("apiKey", NEWS_API_KEY);
     const res = await axios.get(endpoint.toString(), {
@@ -172,6 +171,12 @@ export async function GET(request: Request) {
           ),
         })
         .safeParse(res.data).data ?? null;
+
+    if (newsData !== null) {
+      newsData.articles = newsData.articles.filter(
+        (article) => !article.url.includes("removed.com"),
+      );
+    }
   }
 
   if (newsData === null || newsData?.articles.length === 0) {
