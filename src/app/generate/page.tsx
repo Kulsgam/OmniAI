@@ -23,6 +23,7 @@ import {
 import axios from "axios";
 import { z } from "zod";
 import genVideo, { FinalVideoObject } from "../api/ai/video/videoGenerator";
+import genMemeBuffer from "../api/ai/meme/memeGenerator";
 
 interface State {
   prompt: string;
@@ -130,25 +131,61 @@ function Generate() {
   const [adjusted, setAdjusted] = useState(false);
   const [adjustments, setAdjustments] = useState("");
   const [useAdjustments, setUseAdjustments] = useState(false);
-  const [videoObject, setVideoObject] = useState<FinalVideoObject>({
-    punchline: "",
-    comment: "",
-    videoBuffer: undefined
-  });
+  // const [videoObject, setVideoObject] = useState<FinalVideoObject>({
+  //   punchline: "",
+  //   comment: "",
+  //   videoBuffer: undefined
+  // });
+  const [meme, setMeme] = useState<string>("");
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    async function getVideoObject(name: string, text: string) {
-      const video = await genVideo(name, text);
-      return video;
+    // async function getVideoObject(name: string, text: string) {
+    //   const video = await genVideo(name, text);
+    //   return video;
+    // }
+
+    // getVideoObject("Peter", "Peter").then((video) => {
+    //   if (video) {
+    //     console.log(video);
+    //     setVideoObject(video);
+    //   }
+    // });
+
+    async function getMemeObject(input_prompt: string, context: string) {
+      // const meme = await genMemeBuffer(input_prompt, context);
+      // return meme;
+      const response = await axios.get("/api/ai/meme", {
+        params: {
+          input_prompt: input_prompt,
+          context: context
+        },
+        responseType: "arraybuffer"
+      });
+
+      const memeBase64 = Buffer.from(response.data, 'binary').toString('base64');
+
+      return memeBase64;
     }
 
-    getVideoObject("Peter", "Peter").then((video) => {
-      if (video) {
-        console.log(video);
-        setVideoObject(video);
+    const DEFAULT_INPUT_PROMPT = "Generate a 50 word story about stepping on a lego brick";
+    const DEFAULT_CONTEXT = "On a quiet night, barefoot Sam tiptoed through the dark. Suddenly, agony! A tiny Lego brick embedded in his sole, a cruel surprise. He howled, hopping wildly. His child’s castle masterpiece lay in ruins nearby. Lesson learned: even small things, misplaced, can deliver mighty pain. The brick won the night.";
+
+    getMemeObject(DEFAULT_INPUT_PROMPT, DEFAULT_CONTEXT).then((memeBase64) => {
+      if (memeBase64) {
+        console.log(memeBase64);
+        setMeme(memeBase64);
       }
     });
+    // getMemeObject(DEFAULT_INPUT_PROMPT, DEFAULT_CONTEXT).then((memeBuffer) => {
+    //   if (memeBuffer) {
+    //     const memeBase64 = memeBuffer.toString("base64");
+    //     console.log(memeBase64);
+    //     setMeme(memeBase64);
+    //   }
+    // });
+    // setMeme(memeBase64);
+
   }, [])
   const textQuery = useQuery({
     queryKey: ["text"],
@@ -194,6 +231,31 @@ function Generate() {
       return data;
     },
   });
+
+  const memeQuery = useQuery({
+    queryKey: ["meme"],
+    enabled: state !== null && state.generators.meme,
+    queryFn: async () => {
+      if (state === null) throw new Error("Invalid state.");
+
+      const endpoint = new URL(
+        "/api/ai/meme",
+        document.location.toString(),
+      );
+      endpoint.searchParams.append("input_prompt", state.prompt);
+      endpoint.searchParams.append("context", state.style);
+
+      const res = await axios.get(endpoint.toString(), {
+        responseType: "arraybuffer",
+      });
+      if (res.status !== 200) {
+        console.error(res.data);
+        throw new Error("Could not get meme");
+      }
+
+      return res.data;
+    },
+  })
 
   useEffect(() => {
     if (generateSettings === null) {
@@ -329,9 +391,19 @@ function Generate() {
         </Section>
         <Section
           title="Meme"
-          state={state.generators.meme ? "generating" : "not_generating"}
+          state={
+            !state.generators.meme
+              ? "not_generating"
+              : memeQuery.isPending || memeQuery.isFetching
+                ? "generating"
+                : memeQuery.isError
+                  ? "error"
+                  : "generated"
+          }
         >
-          <div className="aspect-square w-full rounded-lg bg-accent-dark"></div>
+          <div className="aspect-square w-full rounded-lg bg-accent-dark">
+            <img src={`data:image/png;base64,${meme}`}></img>
+          </div>
         </Section>
       </div>
 
