@@ -1,8 +1,26 @@
-<!-- omit in toc -->
-# OmniAI - Turn Headlines Into Highlights 📰🕶️
+<div align="center">
+  <a href="https://genai-hack-global.vercel.app/">
+    <img alt="OmniAI logo" src="./public/logo.png" height="128">
+  </a>
+    <!-- omit in toc -->
+  <h1 style="border: none;">OmniAI</h1>
+    <!-- omit in toc -->
+  <h3 style="color: #868686;">Turn Headlines Into Highlights</h3>
+</div>
+
+---
+
 *Are you struggling to keep your audience engaged with fresh, eye-catching content?*
 
 Our app finds the latest news and instantly turns it into stunning posts, videos, and memes—perfect for any platform. Engage effortlessly and stay ahead!
+
+---
+
+<a href="https://genai-hack-global.vercel.app/" target="_blank"><img alt="chatbot button" src="./public/chatbot_button.svg"></a>
+
+<!-- omit in toc -->
+## **👇 Click the image to watch the demo video**
+[![Watch the video](./public/embed.png)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 <!-- omit in toc -->
 ### News Articles, Summarized for:  
@@ -13,14 +31,10 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 
 ---
 
-<a href="https://example.com" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px;">🚀 Click here to interact with our chatbot 🤖 now!</a>
-
-**👇 Click the image to watch the demo video**
-[![Watch the video](./public/embed.png)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
-
 <!-- omit in toc -->
 ## 📑 Table of Contents
 
+- [🚀 Features](#-features)
 - [🧠 Usage](#-usage)
 - [🛠️ Getting Started](#️-getting-started)
   - [📋 Prerequisites](#-prerequisites)
@@ -28,6 +42,18 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 - [🤖 AI APIs Utilized](#-ai-apis-utilized)
 - [📄 Additional Documentation](#-additional-documentation)
 
+## 🚀 Features
+- [x] Dropdown for tone and format
+- [x] Dropdown for platform
+- [x] Iterative adjustments/refinements based on follow-up prompts
+- [x] Iterative adjustments/refinements based on follow-up prompts with alternative formats
+- [x] Text format generation
+- [x] Video format generation
+- [x] Image format generation
+- [x] Meme format generation - with edit caption functionality
+- [x] Choose any format generation
+- [x] Displays all formats on a single landing page with tab-based previews.
+- [ ] Suggests trending and relevant topics based on platform-specific analytics
 
 ## 🧠 Usage
 
@@ -78,7 +104,7 @@ Before starting, ensure you have the following:
 
 ## 🤖 AI APIs Utilized
 
-1. **Groq**: [Llama3-8b](https://groq.com/) - Large language model capabilities.
+1. **Groq**: [Llama3](https://groq.com/) - Large language model capabilities.
 2. **Pollination.ai**: [Image generation API](https://pollinations.ai/) - Visual asset creation.
 3. **Novita.ai**: [Video generation API](https://novita.ai/) - Dynamic video generation.
 4. **NewsAPI.org**: [API for fetching news articles](https://pollinations.ai/) - Real-time news data.
@@ -86,5 +112,6 @@ Before starting, ensure you have the following:
 ---
 
 ## 📄 Additional Documentation
+- Text generation is often used as context for other media generation. Therefore if the text is regenerated, the user might want to regenerate the other media to 'sync' it.
 
 Stay tuned for more details and usage guides coming soon!
