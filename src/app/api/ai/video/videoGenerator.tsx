@@ -21,6 +21,12 @@ export type VideoIdea = {
   comment: string;
 };
 
+export type FinalVideoObject = {
+  punchline: string;
+  comment: string;
+  videoBuffer: Buffer | undefined;
+}
+
 export default async function genVideo(userInputPrompt, context) {
   console.log("initiating");
   const videoIdea = await genVideoIdea(userInputPrompt, context);
@@ -37,7 +43,7 @@ export default async function genVideo(userInputPrompt, context) {
 
   const finalVideo = await addTextToVideo(videoBuffer, videoIdea.punchline);
 
-  if(finalVideo){
+  if (finalVideo) {
     const filePath = path.join(process.cwd(), "videos", "output_video.mp4");
 
     fs.writeFileSync(filePath, finalVideo);
@@ -54,7 +60,7 @@ async function genVideoIdea(userInputPrompt, context) {
   const finalPrompt = `userInput: ${userInputPrompt}\n${context ? `context: ${context}` : ""}`;
 
   console.log("calling groq");
-  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY, dangerouslyAllowBrowser: true});
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY, dangerouslyAllowBrowser: true });
 
   const response = await groq.chat.completions.create({
     messages: [
@@ -188,10 +194,10 @@ async function addTextToVideo(buffer, text) {
     fs.writeFileSync(inputFilePath, buffer);
 
     const ffmpegArgs = [
-      "-i", inputFilePath, 
+      "-i", inputFilePath,
       "-vf", `drawtext=text='${text}':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=(h-text_h)/2`, // Text overlay
-      "-codec:a", "copy", 
-      outputFilePath, 
+      "-codec:a", "copy",
+      outputFilePath,
     ];
 
     //need to install ffmpeg and set environment variable, otherwise you can just comment this entire code out for now

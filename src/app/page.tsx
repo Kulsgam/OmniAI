@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSetAtom } from "jotai";
 import { generateSettingsAtom } from "@/lib/atoms";
+import TestVideo from "./testVideo";
 
 interface Generators {
   text: boolean;
@@ -60,6 +61,7 @@ function StyleOption({ text }: { text: string }) {
     </Select.Item>
   );
 }
+
 
 export default function Home() {
   const router = useRouter();
@@ -256,6 +258,7 @@ export default function Home() {
           </button>
         </form>
       </div>
+      <TestVideo />
       <div className="mb-5 mt-10 text-accent">by the Newtrons</div>
     </div>
   );

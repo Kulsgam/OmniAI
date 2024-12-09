@@ -22,6 +22,7 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import { z } from "zod";
+import genVideo, { FinalVideoObject } from "../api/ai/video/videoGenerator";
 
 interface State {
   prompt: string;
@@ -49,9 +50,9 @@ function Section({
   title,
   state,
   retrieve_icon = "download",
-  onGenerate = () => {},
-  onRefresh = () => {},
-  onRetrieve = () => {},
+  onGenerate = () => { },
+  onRefresh = () => { },
+  onRetrieve = () => { },
   children,
 }: {
   title: string;
@@ -129,7 +130,26 @@ function Generate() {
   const [adjusted, setAdjusted] = useState(false);
   const [adjustments, setAdjustments] = useState("");
   const [useAdjustments, setUseAdjustments] = useState(false);
+  const [videoObject, setVideoObject] = useState<FinalVideoObject>({
+    punchline: "",
+    comment: "",
+    videoBuffer: undefined
+  });
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    async function getVideoObject(name: string, text: string) {
+      const video = await genVideo(name, text);
+      return video;
+    }
+
+    getVideoObject("Peter", "Peter").then((video) => {
+      if (video) {
+        console.log(video);
+        setVideoObject(video);
+      }
+    });
+  }, [])
   const textQuery = useQuery({
     queryKey: ["text"],
     enabled: state !== null && state.generators.text,
