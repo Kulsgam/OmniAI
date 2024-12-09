@@ -10,8 +10,8 @@ import * as path from "path";
 jest.setTimeout(12000);
 
 describe("Media Processing API Tests", () => {
-  const outputDir = path.join(__dirname, "out");
-  const dataDir = path.join(__dirname, "data");
+  const outputDir = path.join(__dirname, "../out");
+  const dataDir = path.join(__dirname, "../data");
 
   beforeAll(() => {
     // Ensure output directory exists
