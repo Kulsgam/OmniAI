@@ -10,6 +10,7 @@
     "test": "jest",
     "test:meme": "jest __tests__/meme",
     "test:sum": "jest __tests__/summarizer",
+    "test:vid": "jest __tests__/video",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },

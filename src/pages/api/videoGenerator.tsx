@@ -90,7 +90,7 @@ async function genVideoIdea(userInputPrompt, context) {
   };
 }
 
-async function genVideoBuffer(prompt) {
+export async function genVideoBuffer(prompt) {
   try {
     const payload = {
       extra: {
@@ -106,7 +106,7 @@ async function genVideoBuffer(prompt) {
       prompts: [
         {
           prompt: prompt,
-          frames: 16,
+          frames: 64,
         },
       ],
       guidance_scale: 7.5,

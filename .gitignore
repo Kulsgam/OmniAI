@@ -41,3 +41,4 @@ next-env.d.ts
 .env
 with_context.png
 without_context.png
+output_video.mp4
