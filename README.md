@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SETUP
+## GETTING API KEYS
+1. Create an account in [Groq to create an API key](https://console.groq.com/keys) and get an API key as outlined in linked documentation
+2. Follow the the steps outlined in the [Novita AI documentation](https://novita.ai/docs/get-started/quickstart.html#_1-go-to-novita-ai-and-log-in) to get an API key
+3. Follow the steps outlined in the [NewsAPI.org documentation](https://newsapi.org/docs/get-started) to get an API key
 
-## Getting Started
+## DEPENDENCIES
+1. [Node.js](https://nodejs.org/en/download/package-manager)
+2. [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 
-First, run the development server:
+## STEPS TO RUN
+1. Ensure all dependencies above are installed
+2. Ensure the API keys as outlined in `GETTING API KEYS` are specified in the `.env` file as shown in `example.env`
+3. Go to the root of the repository
+4. Run `npm i` to install all project dependencies
+5. Run `npm run dev`
+6. Open the localhost site URL (should be [http://localhost:3000](http://localhost:3000) by default) on a browser
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+# USAGE
+TODO: Complete usage after demo video
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# MISCELLANOUS
+## AI APIs used
+1. [Groq's llama3-8b]() for LLM capabilities
+2. [Pollination.ai]() for image generation capabilities
+3. [Novita.ai]() for video generation capbalities
+4. [Newsapi.org]() for news article capabilities
