@@ -34,6 +34,7 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 <!-- omit in toc -->
 ## 📑 Table of Contents
 
+- [🚀 Features](#-features)
 - [🧠 Usage](#-usage)
 - [🛠️ Getting Started](#️-getting-started)
   - [📋 Prerequisites](#-prerequisites)
@@ -41,6 +42,18 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 - [🤖 AI APIs Utilized](#-ai-apis-utilized)
 - [📄 Additional Documentation](#-additional-documentation)
 
+## 🚀 Features
+- [x] Dropdown for tone and format
+- [x] Dropdown for platform
+- [x] Iterative adjustments/refinements based on follow-up prompts
+- [x] Iterative adjustments/refinements based on follow-up prompts with alternative formats
+- [x] Text format generation
+- [x] Video format generation
+- [x] Image format generation
+- [x] Meme format generation - with edit caption functionality
+- [x] Choose any format generation
+- [x] Displays all formats on a single landing page with tab-based previews.
+- [ ] Suggests trending and relevant topics based on platform-specific analytics
 
 ## 🧠 Usage
 
