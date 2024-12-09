@@ -27,6 +27,7 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import { z } from "zod";
+import * as Separator from "@radix-ui/react-separator";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Dialog from "@radix-ui/react-dialog";
 import Prompt from "@/components/Prompt";
@@ -418,6 +419,31 @@ function Generate() {
                     </div>
                   </>
                 )}
+                <Separator.Root
+                  className="my-5 h-[2px] w-full bg-accent-dark"
+                  decorative
+                  orientation="horizontal"
+                />
+                <h2 className="mb-3 mt-5 font-title text-xl">Edit Content</h2>
+                <form className="flex max-w-96 gap-2">
+                  <input
+                    className="w-full flex-grow rounded-lg bg-accent-dark px-3 py-2 placeholder:text-accent"
+                    type="text"
+                    placeholder="Enter your adjustments"
+                    value={adjustments}
+                    onChange={(evt) => setAdjustments(evt.target.value)}
+                  />
+                  <button
+                    disabled={
+                      adjustments.trim().length === 0 || !state.generators.text
+                    }
+                    className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
+                    type="submit"
+                  >
+                    <Icon path={mdiPencil} className="aspect-square w-4" />
+                    Edit
+                  </button>
+                </form>
               </>
             )}
           </Section>

@@ -100,9 +100,9 @@ function Prompt({
     platform: "none",
     generators: {
       text: true,
-      image: false,
-      video: false,
-      meme: false,
+      image: true,
+      video: true,
+      meme: true,
     },
     enableNews: true,
   },

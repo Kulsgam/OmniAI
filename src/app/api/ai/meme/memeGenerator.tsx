@@ -23,22 +23,7 @@ export type MemeIdea = {
   imageGenPrompt: string;
 };
 
-export async function genMemeImg(userInputPrompt: string, context?: string) {
-  const memeIdea = await genMemeIdea(userInputPrompt, context);
-
-  if (!memeIdea) {
-    return;
-  }
-
-  const imageBuffer = await genImageBuffer(memeIdea.imageGenPrompt);
-  if (!imageBuffer) {
-    return;
-  }
-
-  return [imageBuffer, memeIdea.punchline] as const;
-}
-
-async function genMemeIdea(
+export async function genMemeIdea(
   userInputPrompt: string,
   context?: string,
 ): Promise<MemeIdea | undefined> {
@@ -173,11 +158,25 @@ export async function addText(imgBuffer: Buffer, text: string) {
   }
 }
 
-async function genImageBuffer(prompt: string) {
-  const imgURL = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?nologo=true`;
+export async function genImageBuffer(
+  prompt: string,
+  aspectRatio: "portrait" | "landscape" | "square",
+) {
+  const imgURL = new URL(
+    `https://pollinations.ai/${encodeURIComponent(prompt)}`,
+  );
+  const size =
+    aspectRatio === "portrait"
+      ? { w: 720, h: 1280 }
+      : aspectRatio === "landscape"
+        ? { w: 1280, h: 720 }
+        : { w: 1024, h: 1024 };
+  imgURL.searchParams.append("width", size.w.toString(10));
+  imgURL.searchParams.append("height", size.h.toString(10));
+  imgURL.searchParams.append("nologo", "true");
 
   try {
-    const response = await axios.get(imgURL, {
+    const response = await axios.get(imgURL.toString(), {
       responseType: "arraybuffer", // Ensure the response is returned as a buffer
     });
 
