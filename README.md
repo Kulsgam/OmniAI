@@ -16,7 +16,7 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 
 ---
 
-<a href="https://example.com" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px;" target="_blank">🚀 Click here to interact with our chatbot 🤖 now!</a>
+<a href="https://genai-hack-global.vercel.app/" target="_blank"><img alt="chatbot button" src="./public/chatbot_button.svg"></a>
 
 <!-- omit in toc -->
 ## **👇 Click the image to watch the demo video**
