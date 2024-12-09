@@ -210,7 +210,7 @@ function Generate() {
             className="aspect-square w-10 rounded-full bg-cover bg-center"
             style={{ backgroundImage: `url("/logo.png")` }}
           ></div>
-          <h1 className="font-title text-xl">Omni</h1>
+          <h1 className="font-title text-xl">OmniAI</h1>
         </Link>
         <Link
           href="/"

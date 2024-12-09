@@ -10,10 +10,16 @@ import {
   mdiChevronDown,
   mdiCreation,
   mdiEmoticonExcited,
+  mdiFacebook,
   mdiFormatText,
   mdiHistory,
   mdiImage,
+  mdiInstagram,
+  mdiLinkedin,
   mdiPaletteSwatchVariant,
+  mdiReddit,
+  mdiShare,
+  mdiTwitter,
   mdiVideo,
 } from "@mdi/js";
 import { ReactNode, useEffect, useState } from "react";
@@ -49,12 +55,19 @@ function ToggleGenerator({
   );
 }
 
-function StyleOption({ text }: { text: string }) {
+function StyleOption({
+  text,
+  children,
+}: {
+  text: string;
+  children?: ReactNode;
+}) {
   return (
     <Select.Item
       value={text.toLowerCase()}
-      className="flex w-full cursor-pointer items-center justify-center py-2 transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg hover:bg-accent data-[highlighted]:outline-none"
+      className="flex w-full cursor-pointer items-center justify-center gap-2 py-2 transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg hover:bg-accent data-[highlighted]:outline-none"
     >
+      {children}
       <Select.ItemText>{text}</Select.ItemText>
       <Select.ItemIndicator />
     </Select.Item>
@@ -68,19 +81,21 @@ export default function Home() {
   const [writingStyle, setWritingStyle] = useState<string | undefined>(
     undefined,
   );
+  const [platform, setPlatform] = useState<string | undefined>(undefined);
   const [generators, setGenerators] = useState<Generators>({
     text: true,
     image: false,
     video: false,
     meme: false,
   });
-  const [enableNews, setEnableNews] = useState(false);
+  const [enableNews, setEnableNews] = useState(true);
   const setGenerateSettings = useSetAtom(generateSettingsAtom);
 
   useEffect(() => {
     function isValid(): boolean {
       if (prompt.length === 0) return false;
       if (writingStyle === undefined) return false;
+      if (platform === undefined) return false;
       if (
         generators.text === false &&
         generators.image === false &&
@@ -92,6 +107,7 @@ export default function Home() {
         prompt,
         style: writingStyle,
         enableNews,
+        platform,
         generators: { ...generators },
       });
       return true;
@@ -99,7 +115,7 @@ export default function Home() {
 
     setDisabled(!isValid());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prompt, writingStyle, enableNews, generators]);
+  }, [prompt, writingStyle, platform, enableNews, generators]);
 
   return (
     <div className="fullscreen relative flex flex-col items-center">
@@ -109,7 +125,7 @@ export default function Home() {
             className="aspect-square w-10 rounded-full bg-cover bg-center"
             style={{ backgroundImage: `url("/logo.png")` }}
           ></div>
-          <h1 className="font-title text-xl">Omni</h1>
+          <h1 className="font-title text-xl">OmniAI</h1>
         </Link>
         <Link
           href="/"
@@ -126,7 +142,7 @@ export default function Home() {
             className="mb-8 aspect-square w-48 rounded-full bg-cover bg-center"
             style={{ backgroundImage: `url("/logo.png")` }}
           ></div>
-          <h1 className="mb-4 font-title text-5xl">Omni</h1>
+          <h1 className="mb-4 font-title text-5xl">OmniAI</h1>
           <p className="mb-16 w-[248px] text-center text-accent xl:mb-0">
             Generate text, images, and videos from a single prompt.
           </p>
@@ -184,6 +200,62 @@ export default function Home() {
                   <StyleOption text="Instructional" />
                   <StyleOption text="Poetic" />
                   <StyleOption text="Minimalist" />
+                </Select.Viewport>
+                <Select.ScrollDownButton />
+                <Select.Arrow className="fill-accent-dark" />
+              </Select.Content>
+            </Select.Portal>
+          </Select.Root>
+
+          <Select.Root value={platform} onValueChange={setPlatform}>
+            <Select.Trigger className="flex w-full items-center justify-between gap-2 rounded-lg bg-accent-dark px-2.5 py-2 data-[placeholder]:text-accent">
+              <Icon path={mdiShare} className="aspect-square w-5 text-accent" />
+              <Select.Value placeholder="Select a platform" />
+              <Select.Icon asChild>
+                <Icon
+                  path={mdiChevronDown}
+                  className="aspect-square w-4 text-accent"
+                />
+              </Select.Icon>
+            </Select.Trigger>
+
+            <Select.Portal>
+              <Select.Content
+                className="w-[293px] rounded-lg bg-accent-dark"
+                position="popper"
+              >
+                <Select.ScrollUpButton />
+                <Select.Viewport>
+                  <StyleOption text="Facebook">
+                    <Icon
+                      path={mdiFacebook}
+                      className="aspect-square w-5 text-accent"
+                    />
+                  </StyleOption>
+                  <StyleOption text="Twitter">
+                    <Icon
+                      path={mdiTwitter}
+                      className="aspect-square w-5 text-accent"
+                    />
+                  </StyleOption>
+                  <StyleOption text="LinkedIn">
+                    <Icon
+                      path={mdiLinkedin}
+                      className="aspect-square w-5 text-accent"
+                    />
+                  </StyleOption>
+                  <StyleOption text="Instagram">
+                    <Icon
+                      path={mdiInstagram}
+                      className="aspect-square w-5 text-accent"
+                    />
+                  </StyleOption>
+                  <StyleOption text="Reddit">
+                    <Icon
+                      path={mdiReddit}
+                      className="aspect-square w-5 text-accent"
+                    />
+                  </StyleOption>
                 </Select.Viewport>
                 <Select.ScrollDownButton />
                 <Select.Arrow className="fill-accent-dark" />
