@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 
-interface Generate {
+export interface Generate {
   prompt: string;
   style: string;
   platform: string;
@@ -17,7 +17,7 @@ interface Generate {
 export const generateSettingsAtom = atom<Generate | null>({
   prompt: "Generate a tweet about how AI struggles to understand sarcasm.",
   style: "humorous",
-  platform: "LinkedIn",
-  enableNews: true,
+  platform: "linkedin",
+  enableNews: false,
   generators: { text: false, image: false, video: false, meme: false },
 });

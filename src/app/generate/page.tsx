@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  mdiClose,
   mdiContentCopy,
   mdiCreation,
   mdiDownload,
@@ -27,10 +28,13 @@ import {
 import axios from "axios";
 import { z } from "zod";
 import * as Tabs from "@radix-ui/react-tabs";
+import * as Dialog from "@radix-ui/react-dialog";
+import Prompt from "@/components/Prompt";
 
 interface State {
   prompt: string;
   style: string;
+  platform: string;
   enableNews: boolean;
   generators: {
     text: boolean;
@@ -129,7 +133,7 @@ function Section({
 function TabTrigger({ name, children }: { name: string; children: ReactNode }) {
   return (
     <Tabs.Trigger
-      className="flex flex-1 items-center justify-center gap-1 bg-accent-dark py-2 text-sm transition-colors duration-300 first:rounded-l-lg last:rounded-r-lg hover:bg-accent data-[state=active]:bg-accent"
+      className="flex flex-1 items-center justify-center gap-1 bg-accent-dark py-2 text-sm transition-colors duration-200 first:rounded-l-lg last:rounded-r-lg hover:bg-accent data-[state=active]:bg-accent"
       value={name.toLowerCase()}
     >
       {children}
@@ -310,28 +314,39 @@ function Generate() {
         </Link>
       </div>
 
-      <form
-        className="mb-16 flex w-[293px] gap-2 sm:w-[500px]"
-        onSubmit={(evt) => {
-          evt.preventDefault();
-          setUseAdjustments(true);
-        }}
-      >
-        <input
-          className="w-full flex-grow rounded-lg bg-accent-dark px-4 py-3 placeholder:text-accent"
-          type="text"
-          placeholder="Enter your adjustments"
-          value={adjustments}
-          onChange={(evt) => setAdjustments(evt.target.value)}
-        />
-        <button
-          disabled={adjustments.trim().length === 0 || !state.generators.text}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3.5 py-3 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
-          type="submit"
-        >
+      <Dialog.Root>
+        <Dialog.Trigger className="mb-16 flex w-[293px] items-center justify-center gap-2 rounded-lg bg-accent-dark py-3 transition-all duration-200 hover:bg-accent sm:w-[500px]">
           <Icon path={mdiPencil} className="aspect-square w-5" />
-        </button>
-      </form>
+          Edit Your Prompt
+        </Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed left-0 top-0 h-screen w-screen bg-black/25 backdrop-blur-lg" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="w-[333px] rounded-lg border-2 border-solid border-accent-dark bg-accent-darker p-5">
+              <Dialog.Title className="mb-3 text-2xl">
+                Edit Your Prompt
+              </Dialog.Title>
+              <Dialog.Description className="mb-8 w-4/5 text-sm text-accent">
+                Update the prompt to align the generated content to your needs.
+              </Dialog.Description>
+              <Dialog.Close className="absolute right-0 top-0 m-5 flex items-center justify-center rounded-lg bg-accent-dark p-2 transition-all duration-200 hover:bg-accent">
+                <Icon path={mdiClose} className="aspect-square w-4" />
+              </Dialog.Close>
+              <Prompt
+                regenerate
+                initial={{
+                  prompt: state.prompt,
+                  writingStyle: state.style,
+                  platform: state.platform,
+                  generators: { ...state.generators },
+                  enableNews: state.enableNews,
+                }}
+                onSubmit={() => {}}
+              />
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
       <Tabs.Root
         className="flex w-[293px] flex-col gap-2 sm:w-[500px] xl:w-[750px]"
@@ -392,7 +407,7 @@ function Generate() {
                     <div className="mt-2 flex flex-col gap-2">
                       {textQuery.data.news.map((news, idx) => (
                         <a
-                          className="flex-1 overflow-hidden text-ellipsis text-nowrap rounded-lg bg-accent-dark px-2.5 py-1 text-sm transition-colors duration-300 hover:bg-accent"
+                          className="flex-1 overflow-hidden text-ellipsis text-nowrap rounded-lg bg-accent-dark px-2.5 py-1 text-sm transition-colors duration-200 hover:bg-accent"
                           target="_blank"
                           key={idx}
                           href={news.url}
