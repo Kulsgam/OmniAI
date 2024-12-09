@@ -23,17 +23,19 @@ export type MemeIdea = {
   imageGenPrompt: string;
 };
 
-export default async function genMemeImg(
-  userInputPrompt: string,
-  context?: string,
-) {
+export async function genMemeImg(userInputPrompt: string, context?: string) {
   const memeIdea = await genMemeIdea(userInputPrompt, context);
 
   if (!memeIdea) {
     return;
   }
 
-  return await genImageBuffer(memeIdea.imageGenPrompt);
+  const imageBuffer = await genImageBuffer(memeIdea.imageGenPrompt);
+  if (!imageBuffer) {
+    return;
+  }
+
+  return [imageBuffer, memeIdea.punchline] as const;
 }
 
 async function genMemeIdea(
