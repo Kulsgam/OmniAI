@@ -51,8 +51,6 @@ export async function GET(request: Request) {
     aspectRatio !== "landscape" &&
     aspectRatio !== "square"
   ) {
-    console.log("x");
-
     return new Response("Invalid input.", { status: 400 });
   }
 
