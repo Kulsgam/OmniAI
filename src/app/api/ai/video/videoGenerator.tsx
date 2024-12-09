@@ -64,7 +64,7 @@ async function genVideoIdea(userInputPrompt, context) {
       },
       { role: "user", content: finalPrompt },
     ],
-    model: "llama3-8b-8192",
+    model: "llama3-70b-8192",
     temperature: 1,
     top_p: 1,
     max_tokens: 1024,
