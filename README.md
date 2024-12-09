@@ -3,7 +3,7 @@
     <img alt="OmniAI logo" src="./public/logo.png" height="128">
   </a>
     <!-- omit in toc -->
-  <h1 style="border: none; margin-bottom: -6%;">OmniAI</h1>
+  <h1 style="border: none;">OmniAI</h1>
     <!-- omit in toc -->
   <h3 style="color: #868686;">Turn Headlines Into Highlights</h3>
 </div>
