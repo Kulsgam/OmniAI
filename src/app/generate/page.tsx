@@ -141,10 +141,13 @@ function Generate() {
   const router = useRouter();
   const [state, setState] = useState<State | null>(null);
   const [generateSettings, setGenerateSettings] = useAtom(generateSettingsAtom);
+  const [memeSrc, setMemeSrc] = useState<string | undefined>();
+  const [punchline, setPunchline] = useState<string | null>(null);
   const [adjusted, setAdjusted] = useState(false);
   const [adjustments, setAdjustments] = useState("");
   const [useAdjustments, setUseAdjustments] = useState(false);
   const queryClient = useQueryClient();
+
   const textQuery = useQuery({
     queryKey: ["text"],
     enabled: state !== null && state.generators.text,
@@ -189,6 +192,77 @@ function Generate() {
       return data;
     },
   });
+
+  const memeQuery = useQuery({
+    queryKey: ["meme"],
+    enabled:
+      state !== null &&
+      state.generators.meme &&
+      (!state.generators.text || textQuery.isSuccess),
+    queryFn: async () => {
+      if (state === null) throw new Error("Invalid state.");
+
+      const endpoint = new URL("/api/ai/meme", document.location.toString());
+      endpoint.searchParams.append("input_prompt", state.prompt);
+      if (textQuery.isSuccess) {
+        endpoint.searchParams.append("context", textQuery.data.text);
+      }
+
+      const res = await axios.get(endpoint.toString());
+      if (res.status !== 200) {
+        console.error(res.data);
+        throw new Error("Could not get meme");
+      }
+
+      const data = z
+        .object({
+          punchline: z.string(),
+          image_buffer: z.string(),
+        })
+        .parse(res.data);
+
+      return data;
+    },
+  });
+
+  const finalMemeQuery = useQuery({
+    queryKey: ["final_meme"],
+    enabled: state !== null && memeQuery.isSuccess,
+    queryFn: async () => {
+      if (state === null || !memeQuery.isSuccess)
+        throw new Error("Invalid state.");
+
+      const endpoint = new URL(
+        "/api/ai/meme-edit",
+        document.location.toString(),
+      );
+
+      const res = await axios.post(
+        endpoint.toString(),
+        {
+          punchline: punchline === null ? memeQuery.data.punchline : punchline,
+          image_buffer: memeQuery.data.image_buffer,
+        },
+        { responseType: "blob" },
+      );
+      const data = res.data;
+      if (res.status !== 200 || !(data instanceof Blob)) {
+        console.error(data);
+        throw new Error("Could not get meme");
+      }
+
+      setMemeSrc(undefined);
+
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (!finalMemeQuery.isSuccess || memeSrc !== undefined) return;
+    const data = finalMemeQuery.data;
+    const url = URL.createObjectURL(data);
+    setMemeSrc(url);
+  }, [finalMemeQuery, memeSrc]);
 
   useEffect(() => {
     if (generateSettings === null) {
@@ -352,9 +426,28 @@ function Generate() {
         <Tabs.Content value="meme">
           <Section
             title="Meme"
-            state={state.generators.meme ? "generating" : "not_generating"}
+            state={
+              !state.generators.meme
+                ? "not_generating"
+                : finalMemeQuery.isPending || finalMemeQuery.isFetching
+                  ? "generating"
+                  : memeQuery.isError || finalMemeQuery.isError
+                    ? "error"
+                    : "generated"
+            }
+            onGenerate={() => {
+              setState({
+                ...state,
+                generators: { ...state.generators, meme: true },
+              });
+            }}
+            // onRefresh={() =>
+            //   queryClient.invalidateQueries({ queryKey: ["final_meme"] })
+            // }
           >
-            <div className="aspect-square w-full rounded-lg bg-accent-dark"></div>
+            <div className="aspect-square w-full rounded-lg bg-accent-dark">
+              <img src={memeSrc} alt="Meme" />
+            </div>
           </Section>
         </Tabs.Content>
       </Tabs.Root>

@@ -16,5 +16,5 @@ export async function GET(request: Request) {
   }
 
   const base64String = btoa(String.fromCharCode(...new Uint8Array(meme[0])));
-  return Response.json({ punchline: meme[1], buffer: base64String });
+  return Response.json({ punchline: meme[1], image_buffer: base64String });
 }
