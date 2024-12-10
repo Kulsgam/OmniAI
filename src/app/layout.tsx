@@ -14,7 +14,7 @@ const parkinsans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Omni",
+  title: "OmniAI",
   description: "Generate text, images, and videos from a single prompt.",
 };
 

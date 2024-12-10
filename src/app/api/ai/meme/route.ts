@@ -1,4 +1,4 @@
-import genMemeImg from "./memeGenerator";
+import { genMemeIdea } from "./memeGenerator";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -6,19 +6,17 @@ export async function GET(request: Request) {
   const context = searchParams.get("context");
 
   if (inputPrompt === null) {
-    return Response.json(
-      { error: "Missing query parameters." },
-      { status: 400 },
-    );
+    return new Response("Invalid input.", { status: 400 });
   }
 
-  const meme = await genMemeImg(inputPrompt, context ?? undefined);
+  const memeIdea = await genMemeIdea(inputPrompt, context ?? undefined);
 
-  if (meme === undefined) {
+  if (memeIdea === undefined) {
     return Response.json({ error: "Couldn't generate meme." }, { status: 500 });
   }
 
-  const res = new Response(meme);
-  res.headers.set("Content-Type", "image/png");
-  return res;
+  return Response.json({
+    punchline: memeIdea.punchline,
+    imageGenPrompt: memeIdea.imageGenPrompt,
+  });
 }
