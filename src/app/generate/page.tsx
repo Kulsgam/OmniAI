@@ -177,7 +177,6 @@ function Generate() {
     video: null as string | null,
     meme: null as string | null,
   });
-  // const [useAdjustments, setUseAdjustments] = useState(false);
   const queryClient = useQueryClient();
 
   const newsQuery = useQuery({
@@ -273,8 +272,36 @@ function Generate() {
     queryFn: async () => {
       if (state === null) throw new Error("Invalid state.");
 
+      if (applyAdjustmentsRef.current.image) {
+        const adjustment = adjustments.image;
+        applyAdjustmentsRef.current.image = false;
+        setAdjustments({ ...adjustments, image: "" });
+
+        const endpoint = new URL(
+          "/api/ai/adjust",
+          document.location.toString(),
+        );
+        endpoint.searchParams.append(
+          "input_prompt",
+          adjustedPrompts.current.image ?? state.prompt,
+        );
+        endpoint.searchParams.append("adjustment", adjustment);
+
+        const res = await axios.get(endpoint.toString());
+        if (res.status !== 200) {
+          console.error(res.data);
+          throw new Error("Could not get text");
+        }
+
+        const data = z.string().parse(res.data);
+        adjustedPrompts.current.image = data;
+      }
+
       const endpoint = new URL("/api/ai/image", document.location.toString());
-      endpoint.searchParams.append("input_prompt", state.prompt);
+      endpoint.searchParams.append(
+        "input_prompt",
+        adjustedPrompts.current.image ?? state.prompt,
+      );
       endpoint.searchParams.append("aspect_ratio", "landscape");
 
       let context: string | null = null;
@@ -319,8 +346,36 @@ function Generate() {
     queryFn: async () => {
       if (state === null) throw new Error("Invalid state.");
 
+      if (applyAdjustmentsRef.current.meme) {
+        const adjustment = adjustments.meme;
+        applyAdjustmentsRef.current.meme = false;
+        setAdjustments({ ...adjustments, meme: "" });
+
+        const endpoint = new URL(
+          "/api/ai/adjust",
+          document.location.toString(),
+        );
+        endpoint.searchParams.append(
+          "input_prompt",
+          adjustedPrompts.current.meme ?? state.prompt,
+        );
+        endpoint.searchParams.append("adjustment", adjustment);
+
+        const res = await axios.get(endpoint.toString());
+        if (res.status !== 200) {
+          console.error(res.data);
+          throw new Error("Could not get text");
+        }
+
+        const data = z.string().parse(res.data);
+        adjustedPrompts.current.meme = data;
+      }
+
       const endpoint = new URL("/api/ai/meme", document.location.toString());
-      endpoint.searchParams.append("input_prompt", state.prompt);
+      endpoint.searchParams.append(
+        "input_prompt",
+        adjustedPrompts.current.meme ?? state.prompt,
+      );
 
       let context: string | null = null;
       if (state.enableNews && newsQuery.isSuccess) {
@@ -366,7 +421,7 @@ function Generate() {
           "image_prompt",
           memeQuery.data.imageGenPrompt,
         );
-        endpoint.searchParams.append("aspect_ratio", "portrait");
+        endpoint.searchParams.append("aspect_ratio", "landscape");
 
         const res = await axios.get(endpoint.toString());
         if (res.status !== 200) {
@@ -636,9 +691,43 @@ function Generate() {
               downloadURI(imageSrc, "Image.png");
             }}
           >
-            <div className="aspect-square w-full rounded-lg bg-accent-dark">
-              <img src={imageSrc} alt="Meme" />
-            </div>
+            <>
+              <div className="w-full rounded-lg bg-accent-dark">
+                <img src={imageSrc} alt="Meme" />
+              </div>
+              <Separator.Root
+                className="my-5 h-[2px] w-full bg-accent-dark"
+                decorative
+                orientation="horizontal"
+              />
+              <h2 className="mb-3 mt-5 font-title text-xl">Edit Content</h2>
+              <form
+                className="flex max-w-96 gap-2"
+                onSubmit={(evt) => {
+                  evt.preventDefault();
+                  applyAdjustmentsRef.current.image = true;
+                  queryClient.invalidateQueries({ queryKey: ["image"] });
+                }}
+              >
+                <input
+                  className="w-full flex-grow rounded-lg bg-accent-dark px-3 py-2 placeholder:text-accent"
+                  type="text"
+                  placeholder="Enter your adjustments"
+                  value={adjustments.image}
+                  onChange={(evt) =>
+                    setAdjustments({ ...adjustments, image: evt.target.value })
+                  }
+                />
+                <button
+                  disabled={adjustments.image.trim().length === 0}
+                  className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
+                  type="submit"
+                >
+                  <Icon path={mdiPencil} className="aspect-square w-4" />
+                  Edit
+                </button>
+              </form>
+            </>
           </Section>
         </Tabs.Content>
         <Tabs.Content value="video">
@@ -675,9 +764,45 @@ function Generate() {
               downloadURI(memeSrc, "Meme.png");
             }}
           >
-            <div className="aspect-square w-full rounded-lg bg-accent-dark">
-              <img src={memeSrc} alt="Meme" />
-            </div>
+            <>
+              <div className="w-full rounded-lg bg-accent-dark">
+                <img src={memeSrc} alt="Meme" />
+              </div>
+              <Separator.Root
+                className="my-5 h-[2px] w-full bg-accent-dark"
+                decorative
+                orientation="horizontal"
+              />
+              <h2 className="mb-3 mt-5 font-title text-xl">Edit Content</h2>
+              <form
+                className="flex max-w-96 gap-2"
+                onSubmit={(evt) => {
+                  evt.preventDefault();
+                  applyAdjustmentsRef.current.meme = true;
+                  queryClient.invalidateQueries({
+                    queryKey: ["meme", "first"],
+                  });
+                }}
+              >
+                <input
+                  className="w-full flex-grow rounded-lg bg-accent-dark px-3 py-2 placeholder:text-accent"
+                  type="text"
+                  placeholder="Enter your adjustments"
+                  value={adjustments.meme}
+                  onChange={(evt) =>
+                    setAdjustments({ ...adjustments, meme: evt.target.value })
+                  }
+                />
+                <button
+                  disabled={adjustments.meme.trim().length === 0}
+                  className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
+                  type="submit"
+                >
+                  <Icon path={mdiPencil} className="aspect-square w-4" />
+                  Edit
+                </button>
+              </form>
+            </>
           </Section>
         </Tabs.Content>
       </Tabs.Root>
