@@ -136,7 +136,59 @@ Groq, featuring the Llama3 large language model capabilities, provides robust to
 ### [Pollination.ai](https://pollinations.ai/)
 Pollination.ai delivers a cutting-edge image generation API, enabling the creation of high-quality visual assets for your application. Its flexibility and power make it an excellent choice for projects involving custom visualizations or automated design solutions.
 
+# Workflows
+
+## Summarizer
+- **Input**: Article links are provided by the user.
+- **Process**:
+  1. A web crawler fetches and extracts text content from the provided article links.
+  2. The extracted text is sent to Groq's Llama3 large language model.
+- **Output**: Groq's Llama3 processes the content and returns a concise and summarized version of the input text.
+
+## Text Generation
+
+- **Input**: User provides a text prompt.
+- **Process**:
+  1. **Prompt Adjustment**: The input prompt is optimized using the Groq API.
+  2. **Keyword Search**: Keywords are generated from the prompt, and News API is queried if news data is enabled.
+  3. **Content Creation**: The adjusted prompt and optional news content are used for Groq-based text generation.
+- **Output**: The generated content is returned, along with referenced news links (if any).
+
+## Video Generation
+
+- **Input**: User provides a prompt.
+- **Process**:
+  1. **Prompt Optimization**: Groq's Llama3 processes the user’s query and enriches the prompt for video generation.
+  2. **Video Creation**: The enriched prompt is sent to Novita.ai's Text-to-Video API to generate captivating video content.
+  3. **Text Overlay**: The generated video is enhanced with text overlays using FFMPEG.
+- **Output**: The final video is ready for posting, complete with overlays and dynamic visuals.
+
+## Image Generation
+
+- **Input**: User provides a text prompt.
+- **Process**:
+  1. **Prompt Adjustment**: The user prompt is refined and enhanced using the Groq API to generate a better prompt.
+  2. **Prompt Integration**: The improved prompt is appended with an online API link.
+  3. **Image Generation**: The Pollination API is called with the adjusted prompt and returns the link to the generated image.
+- **Output**: A high-quality image is generated and returned via the provided link.
+
+## Meme Generation
+
+- **Input**: User provides a text prompt and optional generated text.
+- **Process**:
+  1. **Punchline Creation**: Groq's Llama3 generates a punchline and an image prompt based on the input.
+  2. **Image Generation**: The image prompt is sent to the Pollination API to create an image.
+  3. **Image Manipulation**: The generated image is processed using an image buffer manipulator.
+  4. **Punchline Overlay**: The punchline is added to the image buffer manipulator to create the final meme.
+- **Output**: The final meme is a combination of the punchline and the generated image.
+
 ## 📄 Additional Documentation
 - Text generation is often used as context for other media generation. Therefore if the text is regenerated, the user might want to regenerate the other media to 'sync' it.
+
+### Future Work
+
+- Speech Recognition
+- Profile and Account System for Chat History
+- Desktop App and Mobile Applications
 
 Stay tuned for more details and usage guides coming soon!
