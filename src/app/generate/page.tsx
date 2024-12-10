@@ -157,6 +157,7 @@ function Generate() {
   const [generateSettings, setGenerateSettings] = useAtom(generateSettingsAtom);
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [memeSrc, setMemeSrc] = useState<string | undefined>();
+  const [vidSrc, setVidSrc] = useState<string | undefined>();
   // const [punchline, setPunchline] = useState<string | null>(null);
   // const [adjusted, setAdjusted] = useState(false);
   const [adjustments, setAdjustments] = useState({
@@ -336,6 +337,74 @@ function Generate() {
     },
   });
 
+  const videoQuery = useQuery({
+    queryKey: ["video"],
+    enabled:
+      state !== null &&
+      state.generators.video &&
+      (!state.enableNews || newsQuery.isSuccess) &&
+      (!state.generators.text || textQuery.isSuccess),
+    queryFn: async () => {
+      if (state === null) throw new Error("Invalid state.");
+
+      // if (applyAdjustmentsRef.current.image) {
+      //   const adjustment = adjustments.image;
+      //   applyAdjustmentsRef.current.image = false;
+      //   setAdjustments({ ...adjustments, image: "" });
+
+      //   const endpoint = new URL(
+      //     "/api/ai/adjust",
+      //     document.location.toString(),
+      //   );
+      //   endpoint.searchParams.append(
+      //     "input_prompt",
+      //     adjustedPrompts.current.image ?? state.prompt,
+      //   );
+      //   endpoint.searchParams.append("adjustment", adjustment);
+
+      //   const res = await axios.get(endpoint.toString());
+      //   if (res.status !== 200) {
+      //     console.error(res.data);
+      //     throw new Error("Could not get text");
+      //   }
+
+      //   const data = z.string().parse(res.data);
+      //   adjustedPrompts.current.image = data;
+      // }
+
+      const endpoint = new URL("/api/ai/video", document.location.toString());
+      endpoint.searchParams.append("input_prompt", state.prompt);
+      endpoint.searchParams.append("aspect_ratio", "landscape");
+
+      let context: string | null = null;
+      if (state.enableNews && newsQuery.isSuccess) {
+        context = newsQuery.data.summary;
+      }
+
+      if (state.generators.text && textQuery.isSuccess) {
+        context = (context === null ? "" : context + "\n\n") + textQuery.data;
+      }
+
+      if (context !== null) {
+        endpoint.searchParams.append("context", context);
+      }
+
+      const res = await axios.get(endpoint.toString(), {
+        responseType: "blob",
+      });
+
+      const data = res.data;
+      if (res.status !== 200 || !(data instanceof Blob)) {
+        console.error(data);
+        throw new Error("Could not get video");
+      }
+
+      setVidSrc(undefined);
+
+      return data;
+    },
+  });
+
   const memeQuery = useQuery({
     queryKey: ["meme", "first"],
     enabled:
@@ -465,6 +534,13 @@ function Generate() {
   });
 
   useEffect(() => {
+    if (!videoQuery.isSuccess || vidSrc !== undefined) return;
+    const data = videoQuery.data;
+    const url = URL.createObjectURL(data);
+    setVidSrc(url);
+  }, [videoQuery, vidSrc]);
+
+  useEffect(() => {
     if (!imageQuery.isSuccess || imageSrc !== undefined) return;
     const data = imageQuery.data;
     const imageBuffer = Uint8Array.from(atob(data.image_buffer), (c) =>
@@ -495,12 +571,6 @@ function Generate() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // useEffect(() => {
-  //   if (useAdjustments) {
-  //     queryClient.invalidateQueries({ queryKey: ["text"] });
-  //   }
-  // }, [useAdjustments, queryClient]);
 
   if (state === null) {
     return <></>;
@@ -552,7 +622,33 @@ function Generate() {
                   generators: { ...state.generators },
                   enableNews: state.enableNews,
                 }}
-                onSubmit={() => {}}
+                onSubmit={(settings) => {
+                  setState({
+                    ...settings,
+                    generators: { ...settings.generators },
+                  });
+                  setImageSrc(undefined);
+                  setMemeSrc(undefined);
+                  setAdjustments({
+                    text: "",
+                    image: "",
+                    video: "",
+                    meme: "",
+                  });
+                  applyAdjustmentsRef.current = {
+                    text: false,
+                    image: false,
+                    video: false,
+                    meme: false,
+                  };
+                  adjustedPrompts.current = {
+                    text: null,
+                    image: null,
+                    video: null,
+                    meme: null,
+                  };
+                  queryClient.invalidateQueries();
+                }}
               />
             </div>
           </Dialog.Content>
@@ -693,7 +789,7 @@ function Generate() {
           >
             <>
               <div className="w-full rounded-lg bg-accent-dark">
-                <img src={imageSrc} alt="Meme" />
+                <img src={imageSrc} alt="Image" />
               </div>
               <Separator.Root
                 className="my-5 h-[2px] w-full bg-accent-dark"
@@ -733,9 +829,35 @@ function Generate() {
         <Tabs.Content value="video">
           <Section
             title="Video"
-            state={state.generators.video ? "generating" : "not_generating"}
+            state={
+              !state.generators.video
+                ? "not_generating"
+                : videoQuery.isPending || videoQuery.isFetching
+                  ? "generating"
+                  : videoQuery.isError
+                    ? "error"
+                    : "generated"
+            }
+            onGenerate={() => {
+              setState({
+                ...state,
+                generators: { ...state.generators, video: true },
+              });
+            }}
+            onRefresh={() =>
+              queryClient.invalidateQueries({ queryKey: ["video"] })
+            }
+            onRetrieve={() => {
+              if (!memeSrc) return;
+              downloadURI(memeSrc, "Video.mp4");
+            }}
           >
-            <div className="aspect-video w-full rounded-lg bg-accent-dark"></div>
+            <div className="w-full rounded-lg bg-accent-dark">
+              <video width="768" height="432" autoPlay>
+                <source src={vidSrc} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </Section>
         </Tabs.Content>
         <Tabs.Content value="meme">

@@ -1,7 +1,7 @@
 "use client";
 
 import { Generate } from "@/lib/atoms";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import * as Toggle from "@radix-ui/react-toggle";
 import * as Select from "@radix-ui/react-select";
 import * as Checkbox from "@radix-ui/react-checkbox";
@@ -23,6 +23,7 @@ import {
   mdiTwitter,
   mdiVideo,
 } from "@mdi/js";
+import CombinedTrends from "./combined_trends.json";
 
 function getSettings(
   generators: Generate["generators"],
@@ -128,6 +129,7 @@ function Prompt({
     initial.generators,
   );
   const [enableNews, setEnableNews] = useState(initial.enableNews);
+  const [placeholder, setPlaceholder] = useState<string | null>(null);
 
   const settings = getSettings(
     generators,
@@ -136,6 +138,16 @@ function Prompt({
     writingStyle,
     platform,
   );
+
+  useEffect(() => {
+    let idx = 0;
+    const interval = setInterval(() => {
+      const trend = CombinedTrends[idx % CombinedTrends.length];
+      setPlaceholder(trend);
+      idx++;
+    }, 5_000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <form
@@ -149,7 +161,7 @@ function Prompt({
         name="prompt"
         rows={3}
         className="w-full resize-none rounded-lg bg-accent-dark px-4 py-3 placeholder:text-accent"
-        placeholder="Enter your prompt"
+        placeholder={placeholder ?? "Enter your prompt"}
         value={prompt}
         onChange={(evt) => setPrompt(evt.target.value)}
       />

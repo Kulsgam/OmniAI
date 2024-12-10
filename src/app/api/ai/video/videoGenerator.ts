@@ -3,6 +3,7 @@
 import Groq from "groq-sdk";
 import axios from "axios";
 import assert from "assert";
+import { TextToSpeechClient, protos } from "@google-cloud/text-to-speech";
 
 export const portraitDims = {
   height: 768,
@@ -14,18 +15,67 @@ export const landscapeDims = {
   width: 768,
 };
 
-export function calculateMaxChars(
+const client = new TextToSpeechClient({
+  keyFilename: process.env.GOOGLE_API_KEY, // Replace with the path to your API key file
+});
+
+const audioContext = new AudioContext();
+export async function TTS(text: string): Promise<[Buffer, AudioBuffer]> {
+  const request: protos.google.cloud.texttospeech.v1.ISynthesizeSpeechRequest =
+    {
+      input: { text },
+      voice: {
+        languageCode: "en-US",
+        ssmlGender: protos.google.cloud.texttospeech.v1.SsmlVoiceGender.NEUTRAL,
+      },
+      audioConfig: {
+        audioEncoding: protos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
+      },
+    };
+
+  try {
+    // Perform the text-to-speech request
+    const [response] = await client.synthesizeSpeech(request);
+
+    if (response.audioContent) {
+      const normalBuffer = Buffer.from(response.audioContent);
+
+      // Convert the Buffer to an ArrayBuffer
+      const arrayBuffer = normalBuffer.buffer.slice(
+        normalBuffer.byteOffset,
+        normalBuffer.byteOffset + normalBuffer.byteLength,
+      );
+
+      // Decode the audio data into an AudioBuffer
+      const decodedAudioBuffer =
+        await audioContext.decodeAudioData(arrayBuffer);
+
+      console.log("Normal buffer and audio buffer generated successfully.");
+      return [normalBuffer, decodedAudioBuffer];
+    } else {
+      throw new Error("No audio content returned from TTS API.");
+    }
+  } catch (error) {
+    console.error("Error during TTS request:", error);
+    throw error;
+  }
+}
+
+export async function calculateMaxChars(
   screenWidth: number,
   fontSize: number,
   maxWidthPercentage: number = 0.9,
-): number {
+): Promise<number> {
   const usableWidth = screenWidth * maxWidthPercentage;
   const charWidthToFontSizeRatio = 0.6;
 
   return Math.floor(usableWidth / (fontSize * charWidthToFontSizeRatio));
 }
 
-export function splitTextIntoChunks(text: string, maxChars: number): string[] {
+export async function splitTextIntoChunks(
+  text: string,
+  maxChars: number,
+): Promise<string[]> {
   const words = text.split(" ");
 
   assert(maxChars > Math.max(...words.map((word) => word.length)));
@@ -55,7 +105,7 @@ export function splitTextIntoChunks(text: string, maxChars: number): string[] {
   return chunks;
 }
 
-export async function genVideoPrompt(videoScript: string, totTime: number) {
+export async function genVideoPrompts(videoScript: string, totTime: number) {
   const systemPrompt = `You are a world class video prompt generating machine. Given an input video script by the user, you will generate ${Math.ceil(totTime / 6)} video prompts in sequential manner, relevant to the video script. Each of those video prompts are separated by 2 newlines. The generated text should include ONLY the video prompts and NO other filler text.
   eg:-
   \`\`\`
