@@ -48,12 +48,11 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 - [x] Iterative adjustments/refinements based on follow-up prompts
 - [x] Iterative adjustments/refinements based on follow-up prompts with alternative formats
 - [x] Text format generation
-- [x] Video format generation
 - [x] Image format generation
 - [x] Meme format generation - with edit caption functionality
 - [x] Choose any format generation
 - [x] Displays all formats on a single landing page with tab-based previews.
-- [ ] Suggests trending and relevant topics based on platform-specific analytics
+- [x] Suggests trending and relevant topics based on platform-specific analytics
 
 ## 🧠 Usage
 
