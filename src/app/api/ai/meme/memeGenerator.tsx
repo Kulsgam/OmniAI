@@ -160,7 +160,7 @@ export async function addText(imgBuffer: Buffer, text: string) {
 
 export async function genImageBuffer(
   prompt: string,
-  aspectRatio: "portrait" | "landscape" | "square",
+  aspectRatio: "portrait" | "landscape",
 ) {
   const imgURL = new URL(
     `https://pollinations.ai/p/${encodeURIComponent(prompt)}`,

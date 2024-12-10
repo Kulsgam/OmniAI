@@ -46,11 +46,7 @@ export async function GET(request: Request) {
     return new Response("Invalid input.", { status: 400 });
   }
 
-  if (
-    aspectRatio !== "portrait" &&
-    aspectRatio !== "landscape" &&
-    aspectRatio !== "square"
-  ) {
+  if (aspectRatio !== "portrait" && aspectRatio !== "landscape") {
     return new Response("Invalid input.", { status: 400 });
   }
 

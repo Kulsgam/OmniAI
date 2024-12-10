@@ -7,18 +7,22 @@ const CouldNotGenerate = Response.json({
   message: "Was unable to generate text.",
 });
 
-const TEXT_QUERY = (style: string) =>
+function PLATFORM(platform?: string) {
+  return platform ? `You will also generate the text for ${platform}.` : "";
+}
+
+const TEXT_QUERY = (style: string, platform?: string) =>
   `
-You are a helpful assistant that generates text for the provided prompt using a ${style} style. Please attempt to use less than 100 words.
+You are a helpful assistant that generates text for the provided prompt using a ${style} style. ${PLATFORM(platform)}Please attempt to use less than 100 words.
 `.trim();
 
-const TEXT_QUERY_WITH_NEWS = (style: string, news: string) =>
+const TEXT_QUERY_WITH_NEWS = (style: string, news: string, platform?: string) =>
   `
 Potentially useful news summaries that can be referenced:
 
 ${news}
 
-You are a helpful assistant that generates text for the provided prompt using a ${style} style. Please attempt to use less than 100 words.
+You are a helpful assistant that generates text for the provided prompt using a ${style} style. ${PLATFORM(platform)}Please attempt to use less than 100 words.
 `.trim();
 
 async function getGroqChatCompletion(system: string, user: string) {
@@ -48,13 +52,16 @@ export async function GET(request: Request) {
   const inputPrompt = searchParams.get("input_prompt");
   const style = searchParams.get("style");
   const news = searchParams.get("news_summary");
+  const platform = searchParams.get("platform");
 
   if (inputPrompt === null || style === null) {
     return new Response("Invalid input.", { status: 400 });
   }
 
   const textQuery =
-    news === null ? TEXT_QUERY(style) : TEXT_QUERY_WITH_NEWS(style, news);
+    news === null
+      ? TEXT_QUERY(style, platform ?? undefined)
+      : TEXT_QUERY_WITH_NEWS(style, news, platform ?? undefined);
 
   const text = await getGroqChatCompletion(textQuery, inputPrompt);
   if (text === null) return CouldNotGenerate;

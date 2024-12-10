@@ -1,8 +1,6 @@
 "use client";
 
 import * as Separator from "@radix-ui/react-separator";
-import Icon from "@mdi/react";
-import { mdiHistory } from "@mdi/js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSetAtom } from "jotai";
@@ -22,13 +20,6 @@ export default function Home() {
             style={{ backgroundImage: `url("/logo.png")` }}
           ></div>
           <h1 className="font-title text-xl">OmniAI</h1>
-        </Link>
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-1 rounded-lg bg-accent-dark px-3 py-2"
-        >
-          <Icon path={mdiHistory} className="aspect-square w-5" />
-          History
         </Link>
       </div>
 

@@ -55,7 +55,7 @@ export function splitTextIntoChunks(text: string, maxChars: number): string[] {
   return chunks;
 }
 
-export async function genVideoPrompts(videoScript: string, totTime: number) {
+export async function genVideoPrompt(videoScript: string, totTime: number) {
   const systemPrompt = `You are a world class video prompt generating machine. Given an input video script by the user, you will generate ${Math.ceil(totTime / 6)} video prompts in sequential manner, relevant to the video script. Each of those video prompts are separated by 2 newlines. The generated text should include ONLY the video prompts and NO other filler text.
   eg:-
   \`\`\`

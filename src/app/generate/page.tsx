@@ -54,6 +54,15 @@ const queryClient = new QueryClient({
   },
 });
 
+function downloadURI(uri: string, name: string) {
+  const link = document.createElement("a");
+  link.download = name;
+  link.href = uri;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function Section({
   title,
   state,
@@ -146,29 +155,94 @@ function Generate() {
   const router = useRouter();
   const [state, setState] = useState<State | null>(null);
   const [generateSettings, setGenerateSettings] = useAtom(generateSettingsAtom);
+  const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [memeSrc, setMemeSrc] = useState<string | undefined>();
-  const [punchline, setPunchline] = useState<string | null>(null);
-  const [adjusted, setAdjusted] = useState(false);
-  const [adjustments, setAdjustments] = useState("");
-  const [useAdjustments, setUseAdjustments] = useState(false);
+  // const [punchline, setPunchline] = useState<string | null>(null);
+  // const [adjusted, setAdjusted] = useState(false);
+  const [adjustment, setAdjustments] = useState("");
+  // const [useAdjustments, setUseAdjustments] = useState(false);
   const queryClient = useQueryClient();
 
-  const textQuery = useQuery({
-    queryKey: ["text"],
-    enabled: state !== null && state.generators.text,
+  const newsQuery = useQuery({
+    queryKey: ["news_summary"],
+    enabled: state !== null && state.enableNews,
     queryFn: async () => {
       if (state === null) throw new Error("Invalid state.");
 
-      const endpoint = new URL(
-        "/api/ai/text-temp",
-        document.location.toString(),
-      );
+      const endpoint = new URL("/api/ai/news", document.location.toString());
       endpoint.searchParams.append("input_prompt", state.prompt);
-      endpoint.searchParams.append("enable_news", state.enableNews.toString());
-      if (useAdjustments) {
-        endpoint.searchParams.append("adjustments", adjustments);
-      } else if (!adjusted) {
-        endpoint.searchParams.append("style", state.style);
+
+      const res = await axios.get(endpoint.toString());
+      if (res.status !== 200) {
+        console.error(res.data);
+        throw new Error("Could not get text");
+      }
+
+      const data = z
+        .object({
+          summary: z.string(),
+          news: z.array(z.object({ title: z.string(), url: z.string().url() })),
+        })
+        .parse(res.data);
+
+      return data;
+    },
+  });
+
+  const textQuery = useQuery({
+    queryKey: ["text"],
+    enabled:
+      state !== null &&
+      state.generators.text &&
+      (!state.enableNews || newsQuery.isSuccess),
+    queryFn: async () => {
+      if (state === null) throw new Error("Invalid state.");
+
+      const endpoint = new URL("/api/ai/text", document.location.toString());
+      endpoint.searchParams.append("input_prompt", state.prompt);
+      endpoint.searchParams.append("style", state.style);
+      endpoint.searchParams.append("platform", state.platform);
+      if (state.enableNews && newsQuery.isSuccess) {
+        endpoint.searchParams.append("news_summary", newsQuery.data.summary);
+      }
+
+      const res = await axios.get(endpoint.toString());
+      if (res.status !== 200) {
+        console.error(res.data);
+        throw new Error("Could not get text");
+      }
+
+      const data = z.string().parse(res.data);
+
+      return data;
+    },
+  });
+
+  const imageQuery = useQuery({
+    queryKey: ["image"],
+    enabled:
+      state !== null &&
+      state.generators.image &&
+      (!state.enableNews || newsQuery.isSuccess) &&
+      (!state.generators.text || textQuery.isSuccess),
+    queryFn: async () => {
+      if (state === null) throw new Error("Invalid state.");
+
+      const endpoint = new URL("/api/ai/image", document.location.toString());
+      endpoint.searchParams.append("input_prompt", state.prompt);
+      endpoint.searchParams.append("aspect_ratio", "square");
+
+      let context: string | null = null;
+      if (state.enableNews && newsQuery.isSuccess) {
+        context = newsQuery.data.summary;
+      }
+
+      if (state.generators.text && textQuery.isSuccess) {
+        context = (context === null ? "" : context + "\n\n") + textQuery.data;
+      }
+
+      if (context !== null) {
+        endpoint.searchParams.append("context", context);
       }
 
       const res = await axios.get(endpoint.toString());
@@ -179,20 +253,10 @@ function Generate() {
 
       const data = z
         .object({
-          text: z.string(),
-          prompt: z.string().nullable(),
-          news: z
-            .array(z.object({ title: z.string(), url: z.string().url() }))
-            .nullable(),
+          image_prompt: z.string().nullable(),
+          image_buffer: z.string().base64(),
         })
         .parse(res.data);
-
-      if (useAdjustments) {
-        setUseAdjustments(false);
-        setAdjustments("");
-        setState({ ...state, prompt: data.prompt ?? state.prompt });
-        setAdjusted(true);
-      }
 
       return data;
     },
@@ -203,14 +267,25 @@ function Generate() {
     enabled:
       state !== null &&
       state.generators.meme &&
+      (!state.enableNews || newsQuery.isSuccess) &&
       (!state.generators.text || textQuery.isSuccess),
     queryFn: async () => {
       if (state === null) throw new Error("Invalid state.");
 
       const endpoint = new URL("/api/ai/meme", document.location.toString());
       endpoint.searchParams.append("input_prompt", state.prompt);
-      if (textQuery.isSuccess) {
-        endpoint.searchParams.append("context", textQuery.data.text);
+
+      let context: string | null = null;
+      if (state.enableNews && newsQuery.isSuccess) {
+        context = newsQuery.data.summary;
+      }
+
+      if (state.generators.text && textQuery.isSuccess) {
+        context = (context === null ? "" : context + "\n\n") + textQuery.data;
+      }
+
+      if (context !== null) {
+        endpoint.searchParams.append("context", context);
       }
 
       const res = await axios.get(endpoint.toString());
@@ -222,7 +297,7 @@ function Generate() {
       const data = z
         .object({
           punchline: z.string(),
-          image_buffer: z.string(),
+          imageGenPrompt: z.string(),
         })
         .parse(res.data);
 
@@ -237,6 +312,31 @@ function Generate() {
       if (state === null || !memeQuery.isSuccess)
         throw new Error("Invalid state.");
 
+      let imageBuffer: string;
+      {
+        const endpoint = new URL("/api/ai/image", document.location.toString());
+        endpoint.searchParams.append(
+          "image_prompt",
+          memeQuery.data.imageGenPrompt,
+        );
+        endpoint.searchParams.append("aspect_ratio", "square");
+
+        const res = await axios.get(endpoint.toString());
+        if (res.status !== 200) {
+          console.error(res.data);
+          throw new Error("Could not get text");
+        }
+
+        const data = z
+          .object({
+            image_prompt: z.string().nullable(),
+            image_buffer: z.string().base64(),
+          })
+          .parse(res.data);
+
+        imageBuffer = data.image_buffer;
+      }
+
       const endpoint = new URL(
         "/api/ai/meme-edit",
         document.location.toString(),
@@ -245,8 +345,8 @@ function Generate() {
       const res = await axios.post(
         endpoint.toString(),
         {
-          punchline: punchline === null ? memeQuery.data.punchline : punchline,
-          image_buffer: memeQuery.data.image_buffer,
+          punchline: memeQuery.data.punchline,
+          image_buffer: imageBuffer,
         },
         { responseType: "blob" },
       );
@@ -261,6 +361,18 @@ function Generate() {
       return data;
     },
   });
+
+  useEffect(() => {
+    if (!imageQuery.isSuccess || imageSrc !== undefined) return;
+    const data = imageQuery.data;
+    const imageBuffer = Uint8Array.from(atob(data.image_buffer), (c) =>
+      c.charCodeAt(0),
+    );
+    const url = URL.createObjectURL(
+      new Blob([imageBuffer], { type: "image/png" }),
+    );
+    setImageSrc(url);
+  }, [imageQuery, imageSrc]);
 
   useEffect(() => {
     if (!finalMemeQuery.isSuccess || memeSrc !== undefined) return;
@@ -282,11 +394,11 @@ function Generate() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (useAdjustments) {
-      queryClient.invalidateQueries({ queryKey: ["text"] });
-    }
-  }, [useAdjustments, queryClient]);
+  // useEffect(() => {
+  //   if (useAdjustments) {
+  //     queryClient.invalidateQueries({ queryKey: ["text"] });
+  //   }
+  // }, [useAdjustments, queryClient]);
 
   if (state === null) {
     return <></>;
@@ -394,19 +506,19 @@ function Generate() {
               queryClient.invalidateQueries({ queryKey: ["text"] })
             }
             onRetrieve={() =>
-              navigator.clipboard.writeText(textQuery.data?.text ?? "")
+              navigator.clipboard.writeText(textQuery.data ?? "")
             }
           >
             {textQuery.data !== undefined && (
               <>
                 <div className="rounded-lg border-dashed border-accent-dark xl:flex xl:h-full xl:w-full xl:items-center xl:justify-center xl:border-2 xl:p-10 xl:text-xl">
-                  <p>{textQuery.data.text}</p>
+                  <p>{textQuery.data}</p>
                 </div>
-                {textQuery.data.news !== null && (
+                {state.enableNews && newsQuery.isSuccess && (
                   <>
                     <h2 className="mt-5 font-title text-xl">Sources</h2>
                     <div className="mt-2 flex flex-col gap-2">
-                      {textQuery.data.news.map((news, idx) => (
+                      {newsQuery.data.news.map((news, idx) => (
                         <a
                           className="flex-1 overflow-hidden text-ellipsis text-nowrap rounded-lg bg-accent-dark px-2.5 py-1 text-sm transition-colors duration-200 hover:bg-accent"
                           target="_blank"
@@ -430,12 +542,12 @@ function Generate() {
                     className="w-full flex-grow rounded-lg bg-accent-dark px-3 py-2 placeholder:text-accent"
                     type="text"
                     placeholder="Enter your adjustments"
-                    value={adjustments}
+                    value={adjustment}
                     onChange={(evt) => setAdjustments(evt.target.value)}
                   />
                   <button
                     disabled={
-                      adjustments.trim().length === 0 || !state.generators.text
+                      adjustment.trim().length === 0 || !state.generators.text
                     }
                     className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
                     type="submit"
@@ -451,9 +563,23 @@ function Generate() {
         <Tabs.Content value="image">
           <Section
             title="Image"
-            state={state.generators.image ? "generating" : "not_generating"}
+            state={
+              !state.generators.image
+                ? "not_generating"
+                : imageQuery.isPending || imageQuery.isFetching
+                  ? "generating"
+                  : textQuery.isError
+                    ? "error"
+                    : "generated"
+            }
+            onRetrieve={() => {
+              if (!imageSrc) return;
+              downloadURI(imageSrc, "Image.png");
+            }}
           >
-            <div className="aspect-square w-full rounded-lg bg-accent-dark"></div>
+            <div className="aspect-square w-full rounded-lg bg-accent-dark">
+              <img src={imageSrc} alt="Meme" />
+            </div>
           </Section>
         </Tabs.Content>
         <Tabs.Content value="video">
@@ -485,6 +611,10 @@ function Generate() {
             // onRefresh={() =>
             //   queryClient.invalidateQueries({ queryKey: ["final_meme"] })
             // }
+            onRetrieve={() => {
+              if (!memeSrc) return;
+              downloadURI(memeSrc, "Image.png");
+            }}
           >
             <div className="aspect-square w-full rounded-lg bg-accent-dark">
               <img src={memeSrc} alt="Meme" />
