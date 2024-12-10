@@ -20,7 +20,7 @@ Our app finds the latest news and instantly turns it into stunning posts, videos
 
 <!-- omit in toc -->
 ## **👇 Click the image to watch the demo video**
-[![Watch the video](./public/embed.png)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+[![Watch the video](./public/embed.png)](https://youtu.be/xdAXzW_SPDY)
 
 <!-- omit in toc -->
 ### News Articles, Summarized for:  
