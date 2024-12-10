@@ -13,7 +13,7 @@ import {
   mdiVideo,
 } from "@mdi/js";
 import Icon from "@mdi/react";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { useAtom } from "jotai";
@@ -159,7 +159,24 @@ function Generate() {
   const [memeSrc, setMemeSrc] = useState<string | undefined>();
   // const [punchline, setPunchline] = useState<string | null>(null);
   // const [adjusted, setAdjusted] = useState(false);
-  const [adjustment, setAdjustments] = useState("");
+  const [adjustments, setAdjustments] = useState({
+    text: "",
+    image: "",
+    video: "",
+    meme: "",
+  });
+  const applyAdjustmentsRef = useRef({
+    text: false,
+    image: false,
+    video: false,
+    meme: false,
+  });
+  const adjustedPrompts = useRef({
+    text: null as string | null,
+    image: null as string | null,
+    video: null as string | null,
+    meme: null as string | null,
+  });
   // const [useAdjustments, setUseAdjustments] = useState(false);
   const queryClient = useQueryClient();
 
@@ -198,8 +215,36 @@ function Generate() {
     queryFn: async () => {
       if (state === null) throw new Error("Invalid state.");
 
+      if (applyAdjustmentsRef.current.text) {
+        const adjustment = adjustments.text;
+        applyAdjustmentsRef.current.text = false;
+        setAdjustments({ ...adjustments, text: "" });
+
+        const endpoint = new URL(
+          "/api/ai/adjust",
+          document.location.toString(),
+        );
+        endpoint.searchParams.append(
+          "input_prompt",
+          adjustedPrompts.current.text ?? state.prompt,
+        );
+        endpoint.searchParams.append("adjustment", adjustment);
+
+        const res = await axios.get(endpoint.toString());
+        if (res.status !== 200) {
+          console.error(res.data);
+          throw new Error("Could not get text");
+        }
+
+        const data = z.string().parse(res.data);
+        adjustedPrompts.current.text = data;
+      }
+
       const endpoint = new URL("/api/ai/text", document.location.toString());
-      endpoint.searchParams.append("input_prompt", state.prompt);
+      endpoint.searchParams.append(
+        "input_prompt",
+        adjustedPrompts.current.text ?? state.prompt,
+      );
       endpoint.searchParams.append("style", state.style);
       endpoint.searchParams.append("platform", state.platform);
       if (state.enableNews && newsQuery.isSuccess) {
@@ -230,7 +275,7 @@ function Generate() {
 
       const endpoint = new URL("/api/ai/image", document.location.toString());
       endpoint.searchParams.append("input_prompt", state.prompt);
-      endpoint.searchParams.append("aspect_ratio", "square");
+      endpoint.searchParams.append("aspect_ratio", "landscape");
 
       let context: string | null = null;
       if (state.enableNews && newsQuery.isSuccess) {
@@ -258,12 +303,14 @@ function Generate() {
         })
         .parse(res.data);
 
+      setImageSrc(undefined);
+
       return data;
     },
   });
 
   const memeQuery = useQuery({
-    queryKey: ["meme"],
+    queryKey: ["meme", "first"],
     enabled:
       state !== null &&
       state.generators.meme &&
@@ -301,12 +348,12 @@ function Generate() {
         })
         .parse(res.data);
 
-      return data;
+      return { ...data, key: Math.random() };
     },
   });
 
   const finalMemeQuery = useQuery({
-    queryKey: ["final_meme"],
+    queryKey: ["meme", "last", memeQuery.data?.key],
     enabled: state !== null && memeQuery.isSuccess,
     queryFn: async () => {
       if (state === null || !memeQuery.isSuccess)
@@ -319,7 +366,7 @@ function Generate() {
           "image_prompt",
           memeQuery.data.imageGenPrompt,
         );
-        endpoint.searchParams.append("aspect_ratio", "square");
+        endpoint.searchParams.append("aspect_ratio", "portrait");
 
         const res = await axios.get(endpoint.toString());
         if (res.status !== 200) {
@@ -402,10 +449,6 @@ function Generate() {
 
   if (state === null) {
     return <></>;
-  }
-
-  if (textQuery.error) {
-    console.log(textQuery.error);
   }
 
   return (
@@ -537,18 +580,25 @@ function Generate() {
                   orientation="horizontal"
                 />
                 <h2 className="mb-3 mt-5 font-title text-xl">Edit Content</h2>
-                <form className="flex max-w-96 gap-2">
+                <form
+                  className="flex max-w-96 gap-2"
+                  onSubmit={(evt) => {
+                    evt.preventDefault();
+                    applyAdjustmentsRef.current.text = true;
+                    queryClient.invalidateQueries({ queryKey: ["text"] });
+                  }}
+                >
                   <input
                     className="w-full flex-grow rounded-lg bg-accent-dark px-3 py-2 placeholder:text-accent"
                     type="text"
                     placeholder="Enter your adjustments"
-                    value={adjustment}
-                    onChange={(evt) => setAdjustments(evt.target.value)}
+                    value={adjustments.text}
+                    onChange={(evt) =>
+                      setAdjustments({ ...adjustments, text: evt.target.value })
+                    }
                   />
                   <button
-                    disabled={
-                      adjustment.trim().length === 0 || !state.generators.text
-                    }
+                    disabled={adjustments.text.trim().length === 0}
                     className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 transition-all duration-200 hover:bg-accent-light disabled:bg-accent-dark disabled:text-accent"
                     type="submit"
                   >
@@ -571,6 +621,15 @@ function Generate() {
                   : textQuery.isError
                     ? "error"
                     : "generated"
+            }
+            onGenerate={() => {
+              setState({
+                ...state,
+                generators: { ...state.generators, image: true },
+              });
+            }}
+            onRefresh={() =>
+              queryClient.invalidateQueries({ queryKey: ["image"] })
             }
             onRetrieve={() => {
               if (!imageSrc) return;
@@ -608,12 +667,12 @@ function Generate() {
                 generators: { ...state.generators, meme: true },
               });
             }}
-            // onRefresh={() =>
-            //   queryClient.invalidateQueries({ queryKey: ["final_meme"] })
-            // }
+            onRefresh={() =>
+              queryClient.invalidateQueries({ queryKey: ["meme", "first"] })
+            }
             onRetrieve={() => {
               if (!memeSrc) return;
-              downloadURI(memeSrc, "Image.png");
+              downloadURI(memeSrc, "Meme.png");
             }}
           >
             <div className="aspect-square w-full rounded-lg bg-accent-dark">
