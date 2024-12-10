@@ -102,14 +102,39 @@ Before starting, ensure you have the following:
       ```
     - Open the deployed URL ([Default URL](http://localhost:3000)) in your browser to view the app.
 
+
+# Project Tech Stack
+
+This project utilizes the following technologies and tools:
+
+## Frontend
+
+### [Next.js](https://nextjs.org/)
+A React-based framework for building server-rendered and statically generated web applications.
+
+### [TypeScript](https://www.typescriptlang.org/)
+A strongly typed programming language that builds on JavaScript, giving you better tooling and safer code.
+
+### [TailwindCSS](https://tailwindcss.com/)
+A utility-first CSS framework for creating custom user interfaces efficiently.
+
+### [Radix UI](https://www.radix-ui.com/)
+A set of accessible, unstyled UI components for building high-quality web applications.
+
 ## 🤖 AI APIs Utilized
 
-1. **Groq**: [Llama3](https://groq.com/) - Large language model capabilities.
-2. **Pollination.ai**: [Image generation API](https://pollinations.ai/) - Visual asset creation.
-3. **Novita.ai**: [Video generation API](https://novita.ai/) - Dynamic video generation.
-4. **NewsAPI.org**: [API for fetching news articles](https://pollinations.ai/) - Real-time news data.
 
----
+### [News API](https://newsapi.org/)
+An API for fetching the latest news articles from various sources and topics. This API allows seamless integration of real-time news data into your application, providing updated and relevant content for users.
+
+### [Novita.ai](https://novita.ai/)
+Novita.ai offers an advanced video generation API that simplifies the creation of dynamic and engaging video content. It is ideal for projects requiring automated video production with personalized and customizable elements.
+
+### [Groq](https://groq.com/)
+Groq, featuring the Llama3 large language model capabilities, provides robust tools for querying and transforming structured content. This is particularly valuable for enhancing AI-driven functionalities and data interactions in projects.
+
+### [Pollination.ai](https://pollinations.ai/)
+Pollination.ai delivers a cutting-edge image generation API, enabling the creation of high-quality visual assets for your application. Its flexibility and power make it an excellent choice for projects involving custom visualizations or automated design solutions.
 
 ## 📄 Additional Documentation
 - Text generation is often used as context for other media generation. Therefore if the text is regenerated, the user might want to regenerate the other media to 'sync' it.
